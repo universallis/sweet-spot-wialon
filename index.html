@@ -2364,6 +2364,10 @@
     function autoConnectFromUrl() {
       if (!HAS_WIALON_SESSION) return;
 
+      console.log("[AutoConnect] SID detectado en URL");
+      console.log("[AutoConnect] Host:", WIALON_HOST);
+      console.log("[AutoConnect] SID length:", URL_SID ? URL_SID.length : 0);
+
       // Mostrar pantalla de conexion con mensaje de auto-conectando
       els.tokenInput.value = "";
       els.tokenInput.disabled = true;
@@ -2375,10 +2379,12 @@
       const session = wialon.core.Session.getInstance();
       session.initSession(WIALON_HOST);
 
-      session.loginToken(URL_SID, "", function(code) {
+      function finalize(code) {
         els.tokenInput.disabled = false;
         els.btnConnect.disabled = false;
         els.btnConnect.textContent = "Conectar";
+
+        console.log("[AutoConnect] Resultado final:", code);
 
         if (code) {
           const errMsg = wialon.core.Errors.getErrorText(code);
@@ -2396,7 +2402,26 @@
 
         state.currentUser = user;
         showMainScreen(user);
-      });
+      }
+
+      // Para SIDs de Wialon Apps, el metodo correcto es loginAuthHash (NO loginToken).
+      // loginToken espera un token permanente generado con createAuthHash.
+      // loginAuthHash "ata" la sesion del SID que el usuario ya tiene activo en Wialon.
+      // Hacemos cascada: primero loginAuthHash, si falla por method-not-found cae a loginToken.
+      if (typeof session.loginAuthHash === "function") {
+        console.log("[AutoConnect] Intentando loginAuthHash");
+        session.loginAuthHash(URL_SID, function(code) {
+          if (code) {
+            console.log("[AutoConnect] loginAuthHash fallo (" + code + "), intentando loginToken");
+            session.loginToken(URL_SID, "", finalize);
+          } else {
+            finalize(0);
+          }
+        });
+      } else {
+        console.log("[AutoConnect] loginAuthHash no disponible, usando loginToken");
+        session.loginToken(URL_SID, "", finalize);
+      }
     }
 
     function showMainScreen(user) {
