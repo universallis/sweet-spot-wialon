@@ -1,0 +1,3564 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet Spot Monitor - Wialon</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <script src="https://hst-api.wialon.com/wsdk/script/wialon.js"></script>
+  <style>
+    :root {
+      --bg: #eaf2fb;
+      --surface: #f8fbff;
+      --surface-soft: #eef5ff;
+      --surface-elevated: rgba(248, 251, 255, 0.94);
+      --line: #cfdced;
+      --line-strong: #adc2dc;
+      --text: #0c1b33;
+      --muted: #4d607a;
+      --muted-soft: #7b8da6;
+      --primary: #2563eb;
+      --primary-strong: #1d4ed8;
+      --primary-soft: #dbeafe;
+      --blue: #2563eb;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --orange: #ea580c;
+      --red: #ef4444;
+      --shadow-sm: 0 1px 2px rgba(23, 32, 51, 0.06);
+      --shadow-md: 0 14px 32px rgba(23, 32, 51, 0.10);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --focus: 0 0 0 3px rgba(37, 99, 235, 0.20);
+
+      /* Gradientes y fondos de hero (claro) */
+      --hero-bg: linear-gradient(135deg, #dbeafe 0%, #eef6ff 56%, #f8fbff 100%);
+      --hero-warn-bg: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      --hero-bad-bg: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%);
+      --hero-border: #bfdbfe;
+      --hero-warn-border: #fde68a;
+      --hero-bad-border: #fecaca;
+      --body-bg: linear-gradient(180deg, #f3f7fc 0%, #e8f0f9 42%, #dfeaf5 100%),
+                 repeating-linear-gradient(90deg, rgba(37, 99, 235, 0.045) 0 1px, transparent 1px 42px);
+    }
+
+    /* === Tema oscuro === */
+    [data-theme="dark"] {
+      --bg: #07111f;
+      --surface: #101b2d;
+      --surface-soft: #16243a;
+      --surface-elevated: rgba(16, 27, 45, 0.94);
+      --line: #253752;
+      --line-strong: #365174;
+      --text: #edf5ff;
+      --muted: #a9b9d0;
+      --muted-soft: #7f91aa;
+      --primary: #60a5fa;
+      --primary-strong: #93c5fd;
+      --primary-soft: rgba(96, 165, 250, 0.17);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.5);
+      --focus: 0 0 0 3px rgba(96, 165, 250, 0.28);
+
+      --hero-bg: linear-gradient(135deg, #122743 0%, #162f50 52%, #101b2d 100%);
+      --hero-warn-bg: linear-gradient(135deg, #2d2418 0%, #3a2f17 100%);
+      --hero-bad-bg: linear-gradient(135deg, #2d1818 0%, #2d1f15 100%);
+      --hero-border: #2a3f5c;
+      --hero-warn-border: #5c4720;
+      --hero-bad-border: #5c2b2b;
+      --body-bg: radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 34%),
+                 linear-gradient(180deg, #07111f 0%, #0a1628 52%, #08111f 100%);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      font-family: "Aptos", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--body-bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    ::selection {
+      background: rgba(37, 99, 235, 0.20);
+      color: var(--text);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(248, 251, 255, 0.90);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text);
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+      overflow: hidden;
+    }
+
+    .brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .brand-mark svg { width: 18px; height: 18px; color: white; }
+
+    .brand-title { display: flex; flex-direction: column; line-height: 1.2; }
+    .brand-title .name { font-size: 15px; font-weight: 700; color: var(--text); }
+    .brand-title .sub { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; }
+
+    .topbar .user-info {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 6px 12px 6px 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .topbar .user-info .avatar {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, #38bdf8 100%);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px white;
+    }
+
+    .connect-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 64px);
+      padding: 24px;
+      background:
+        linear-gradient(135deg, rgba(37, 99, 235, 0.12), transparent 34%),
+        linear-gradient(315deg, rgba(14, 165, 233, 0.10), transparent 38%);
+    }
+
+    .connect-card {
+      max-width: 440px;
+      width: 100%;
+      padding: 32px;
+      animation: fadeUp 0.4s ease;
+      box-shadow: var(--shadow-md);
+    }
+
+    .connect-card h2 {
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 6px;
+      letter-spacing: 0;
+    }
+
+    .connect-card .hint {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .connect-icon {
+      width: 96px; height: 96px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.22);
+      overflow: hidden;
+    }
+
+    .connect-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .connect-icon svg { width: 48px; height: 48px; }
+
+    .connect-card button { width: 100%; margin-top: 8px; padding: 12px; }
+
+    /* === Layout con sidebar === */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+
+    .sidebar {
+      background: var(--surface-elevated);
+      border-right: 1px solid var(--line);
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      backdrop-filter: blur(12px);
+    }
+
+    .sidebar-panel {
+      padding: 16px 18px;
+      margin: 8px 12px 0;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-soft) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-panel label {
+      font-size: 12px;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .sidebar-panel input[type="datetime-local"],
+    .sidebar-panel select {
+      padding: 8px 10px;
+      font-size: 13px;
+      background: white;
+    }
+
+    .sidebar-panel .field { margin-bottom: 12px; }
+    .sidebar-panel .field:last-of-type { margin-bottom: 0; }
+
+    .sidebar-panel button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .sidebar-panel button svg { width: 14px; height: 14px; }
+
+    .sidebar-panel #form-alert .alert,
+    .sidebar-panel #fleet-form-alert .alert {
+      padding: 8px 10px;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--muted);
+      animation: fadeIn 0.4s ease;
+    }
+
+    .empty-state .empty-icon {
+      width: 64px; height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--primary-soft) 0%, #e0f2fe 100%);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .empty-state .empty-icon svg { width: 32px; height: 32px; }
+
+    .empty-state h3 {
+      margin: 0 0 6px 0;
+      font-size: 18px;
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      font-size: 14px;
+      max-width: 380px;
+      line-height: 1.55;
+    }
+
+    .sidebar .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      margin: 1px 12px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius);
+      transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+    }
+
+    .sidebar .nav-item:hover {
+      background: var(--surface-soft);
+      color: var(--text);
+      transform: translateX(2px);
+    }
+
+    .sidebar .nav-item.active {
+      background: linear-gradient(180deg, var(--primary-soft) 0%, #eef6ff 100%);
+      color: var(--primary-strong);
+      font-weight: 600;
+      box-shadow: inset 3px 0 0 var(--primary), var(--shadow-sm);
+    }
+
+    .sidebar .nav-item .icon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .sidebar .nav-item.active .icon { color: var(--primary); }
+    .sidebar .nav-item:hover .icon { color: var(--muted); }
+    .sidebar .nav-item.active:hover .icon { color: var(--primary); }
+
+    .sidebar .nav-section {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted-soft);
+      padding: 18px 26px 6px;
+      font-weight: 700;
+    }
+
+    .sidebar .nav-spacer { flex: 1; }
+
+    .main-content {
+      padding: 32px;
+      overflow-y: auto;
+      min-width: 0;
+    }
+
+    .main-content .section { display: none; }
+    .main-content .section.active { display: block; }
+
+    .section-header {
+      margin-bottom: 24px;
+      animation: fadeUp 0.3s ease;
+    }
+
+    .section-header h2 {
+      margin: 0 0 6px 0;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    .section-header .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow-x: auto;
+        padding: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+      .sidebar .nav-item {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        padding: 13px 14px;
+        white-space: nowrap;
+        margin: 0;
+        border-radius: 0;
+      }
+      .sidebar .nav-item.active {
+        border-left-color: transparent;
+        border-bottom-color: var(--primary);
+        box-shadow: none;
+      }
+      .sidebar .nav-section, .sidebar .nav-spacer { display: none; }
+      .sidebar-panel {
+        flex: 1 0 100%;
+        margin: 0;
+        border-width: 1px 0 0 0;
+        border-radius: 0;
+      }
+      .main-content { padding: 20px; }
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 24px;
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      animation: fadeUp 0.35s ease;
+    }
+
+    .empty-state,
+    #results-card,
+    #fleet-results-card,
+    #fleet-progress-card {
+      background: linear-gradient(180deg, #f8fbff 0%, #f3f8ff 100%);
+    }
+
+    .card h2 {
+      margin: 0 0 8px 0;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    .card h2 .badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      font-size: 11px;
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .card p.hint {
+      margin: 0 0 16px 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="password"], input[type="number"],
+    input[type="datetime-local"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+      color: var(--text);
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    input[type="password"], input[type="text"][data-mono] { font-family: monospace; }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: var(--focus);
+    }
+
+    .sidebar .nav-item:focus-visible,
+    button:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    button {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-strong) 100%);
+      color: white;
+      border: none;
+      padding: 11px 22px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover { background: linear-gradient(180deg, #3b82f6 0%, var(--primary-strong) 100%); box-shadow: 0 14px 24px rgba(37, 99, 235, 0.23); transform: translateY(-1px); }
+    button:active { transform: translateY(1px); }
+    button:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; transform: none; }
+
+    .btn-secondary {
+      background: white;
+      color: var(--muted);
+      border: 1px solid var(--line-strong);
+      box-shadow: none;
+    }
+    .btn-secondary:hover { background: var(--surface-soft); color: var(--text); box-shadow: var(--shadow-sm); }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+      margin-top: 0;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .alert-error { background: #fff1f2; color: #991b1b; border: 1px solid #fecaca; }
+    .alert-success { background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .alert-warn { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+
+    .hidden { display: none; }
+
+    .session-info {
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .session-info strong { color: var(--text); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .collapsible-header h2 { margin: 0; }
+    .collapsible-header .toggle { font-size: 12px; color: #6b7280; }
+
+    .ranges-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 12px;
+      min-width: 520px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+    }
+
+    .ranges-table th, .ranges-table td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .ranges-table tr:last-child td { border-bottom: none; }
+
+    .ranges-table th {
+      background: var(--surface-soft);
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .ranges-table input[type="number"] {
+      width: 104px;
+      padding: 7px 9px;
+      font-size: 13px;
+    }
+
+    /* === RESULTADOS: hero === */
+    .result-hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 36px;
+      align-items: center;
+      padding: 28px 32px;
+      background: var(--hero-bg);
+      border: 1px solid var(--hero-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .result-hero.bad {
+      background: var(--hero-bad-bg);
+      border-color: var(--hero-bad-border);
+      box-shadow: 0 1px 3px rgba(239, 68, 68, 0.06);
+    }
+
+    .result-hero.warn {
+      background: var(--hero-warn-bg);
+      border-color: var(--hero-warn-border);
+      box-shadow: 0 1px 3px rgba(245, 158, 11, 0.06);
+    }
+
+    [data-theme="dark"] .result-hero,
+    [data-theme="dark"] .result-hero.bad,
+    [data-theme="dark"] .result-hero.warn {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .gauge {
+      width: 180px;
+      height: 180px;
+      position: relative;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.62);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 16px 30px rgba(23, 32, 51, 0.08);
+    }
+
+    [data-theme="dark"] .gauge {
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 16px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .gauge svg { transform: rotate(-90deg); display: block; width: 100%; height: 100%; }
+
+    .gauge .bg-arc { fill: none; stroke: rgba(255,255,255,0.82); stroke-width: 16; }
+    .gauge .fill-arc {
+      fill: none;
+      stroke-width: 16;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 3px 7px rgba(0,0,0,0.12));
+    }
+    .gauge.good .fill-arc { stroke: #10b981; }
+    .gauge.warn .fill-arc { stroke: #f59e0b; }
+    .gauge.bad .fill-arc { stroke: #ef4444; }
+
+    .gauge-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .gauge-text .pct {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .gauge.good .pct { color: #047857; }
+    .gauge.warn .pct { color: #b45309; }
+    .gauge.bad .pct { color: #b91c1c; }
+
+    /* Badge de grado */
+    .grade-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .grade-badge .letter {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .grade-badge.grade-a { background: #d1fae5; color: #047857; }
+    .grade-badge.grade-a .letter { color: #047857; }
+    .grade-badge.grade-b { background: #dbeafe; color: #1d4ed8; }
+    .grade-badge.grade-b .letter { color: #1d4ed8; }
+    .grade-badge.grade-c { background: #fef3c7; color: #b45309; }
+    .grade-badge.grade-c .letter { color: #b45309; }
+    .grade-badge.grade-d { background: #fed7aa; color: #c2410c; }
+    .grade-badge.grade-d .letter { color: #c2410c; }
+    .grade-badge.grade-f { background: #fecaca; color: #b91c1c; }
+    .grade-badge.grade-f .letter { color: #b91c1c; }
+
+    /* Score grande en hero */
+    .score-display {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .score-display .score-num {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .score-display .score-num.grade-a { color: #059669; }
+    .score-display .score-num.grade-b { color: #2563eb; }
+    .score-display .score-num.grade-c { color: #d97706; }
+    .score-display .score-num.grade-d { color: #ea580c; }
+    .score-display .score-num.grade-f { color: #dc2626; }
+
+    .score-display .score-unit {
+      font-size: 18px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .gauge-text .label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .hero-summary { color: var(--muted); }
+    .hero-summary .unit-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .hero-summary .meta {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .hero-summary .stat-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .hero-summary .stat {
+      font-size: 13px;
+    }
+    .hero-summary .stat .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .hero-summary .stat .stat-value {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* === Barra apilada === */
+    .stack-bar {
+      display: flex;
+      width: 100%;
+      height: 38px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 20px 0 8px 0;
+      background: #e2e8f0;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.72);
+    }
+
+    .stack-bar .seg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      transition: width 1s ease;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .seg.below { background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%); }
+    .seg.sweet { background: linear-gradient(180deg, #34d399 0%, #10b981 100%); }
+    .seg.above { background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); }
+
+    .stack-legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .stack-legend .item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stack-legend .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.85), 0 1px 3px rgba(23,32,51,0.14);
+    }
+
+    /* === Tarjetas de desglose === */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .breakdown-card {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .breakdown-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+
+    .breakdown-card.idle {
+      background: var(--surface-soft);
+      border-color: var(--line-strong);
+    }
+    .breakdown-card.below {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+    .breakdown-card.sweet {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+    }
+    .breakdown-card.above {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .breakdown-card .bc-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .breakdown-card.idle .bc-title { color: #475569; }
+    .breakdown-card.below .bc-title { color: #b45309; }
+    .breakdown-card.sweet .bc-title { color: #047857; }
+    .breakdown-card.above .bc-title { color: #b91c1c; }
+
+    .breakdown-card .bc-range {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .breakdown-card .bc-time {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .breakdown-card .bc-pct {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* === Footer info (mensajes/periodo) === */
+    .footer-info {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-info span strong { color: var(--text); }
+
+    /* === Observaciones automaticas === */
+    .observations-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .observations-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .obs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .obs-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 1px solid;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .obs-item .obs-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .obs-item.alert {
+      background: #fef3c7;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+    .obs-item.alert .obs-icon { background: #f59e0b; color: white; }
+
+    .obs-item.bad {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .obs-item.bad .obs-icon { background: #ef4444; color: white; }
+
+    .obs-item.info {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1e40af;
+    }
+    .obs-item.info .obs-icon { background: #3b82f6; color: white; }
+
+    .obs-item.ok {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+    .obs-item.ok .obs-icon { background: #10b981; color: white; }
+
+    .obs-item.action {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+    .obs-item.action .obs-icon { background: #64748b; color: white; }
+
+    /* === Vista Flota === */
+    .fleet-hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 34px;
+      align-items: center;
+      padding: 28px 32px;
+      background: var(--hero-bg);
+      border: 1px solid var(--hero-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .donut-wrap {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.62);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 16px 30px rgba(23, 32, 51, 0.08);
+    }
+    .donut-wrap svg { transform: rotate(-90deg); filter: drop-shadow(0 3px 7px rgba(23,32,51,0.10)); }
+    .donut-wrap .donut-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .donut-wrap .donut-text .big {
+      font-size: 30px; font-weight: 800; color: var(--text); line-height: 1;
+    }
+    .donut-wrap .donut-text .small {
+      font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 600;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .donut-legend .item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .donut-legend .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.86), 0 1px 3px rgba(23,32,51,0.14);
+    }
+
+    .donut-legend .count {
+      font-weight: 700;
+      color: var(--text);
+      min-width: 24px;
+    }
+
+    .fleet-summary-title,
+    .leaderboard-title {
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .fleet-summary-title {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .fleet-summary-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    .leaderboard-title {
+      font-size: 15px;
+      margin: 24px 0 12px 0;
+    }
+
+    .unit-type-label,
+    .inline-muted {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .leaderboard {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .leaderboard th, .leaderboard td {
+      text-align: left;
+      padding: 14px 16px;
+      border-bottom: 1px solid #eef2f7;
+      font-size: 13px;
+    }
+
+    .leaderboard tr:last-child td { border-bottom: none; }
+
+    .leaderboard th {
+      background: var(--surface-soft);
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .leaderboard tbody tr {
+      transition: background 0.12s ease;
+    }
+
+    .leaderboard tbody tr:nth-child(even) { background: rgba(238, 245, 255, 0.62); }
+    .leaderboard tbody tr:hover { background: #e7f0ff; }
+
+    .leaderboard .rank {
+      font-weight: 700;
+      color: var(--muted-soft);
+      width: 40px;
+    }
+
+    .leaderboard .rank.top1 { color: #b45309; }
+    .leaderboard .rank.top2 { color: #475569; }
+    .leaderboard .rank.top3 { color: #92400e; }
+
+    .leaderboard .score-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .leaderboard .mini-bar {
+      width: 80px;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .leaderboard .mini-bar .fill {
+      height: 100%;
+      transition: width 0.6s ease;
+    }
+
+    .leaderboard .grade-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .leaderboard .skip {
+      color: #94a3b8;
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    .fleet-progress {
+      padding: 32px;
+      text-align: center;
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .fleet-progress h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .fleet-progress .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .fleet-progress .progress-bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      transition: width 0.3s ease;
+    }
+
+    .fleet-progress .progress-text {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .fleet-controls-panel { display: none; }
+
+    /* === Desglose por dia === */
+    .daily-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .daily-section h3 {
+      margin: 0 0 4px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .daily-section .hint {
+      margin: 0 0 16px 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .day-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 70px 90px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .day-row:last-child { border-bottom: none; }
+
+    .day-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .day-label .dow {
+      font-size: 11px;
+      color: var(--muted-soft);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+    }
+
+    .day-bar {
+      display: flex;
+      height: 24px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #e2e8f0;
+    }
+
+    .day-bar .seg {
+      transition: width 0.6s ease;
+    }
+
+    .day-bar .seg.idle { background: #cbd5e1; }
+    .day-bar .seg.below { background: #f59e0b; }
+    .day-bar .seg.sweet { background: #10b981; }
+    .day-bar .seg.above { background: #ef4444; }
+
+    .day-pct {
+      font-size: 15px;
+      font-weight: 700;
+      text-align: right;
+    }
+    .day-pct.good { color: #047857; }
+    .day-pct.warn { color: #b45309; }
+    .day-pct.bad { color: #b91c1c; }
+    .day-pct.none { color: #94a3b8; font-size: 12px; font-weight: 500; }
+
+    .day-time {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        padding: 10px 14px;
+      }
+
+      .brand-title .sub {
+        display: none;
+      }
+
+      .topbar .user-info {
+        max-width: 44%;
+      }
+
+      .topbar .user-info #user-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .section-header h2 {
+        font-size: 22px;
+      }
+
+      .card,
+      .connect-card {
+        padding: 18px;
+      }
+
+      .result-hero,
+      .fleet-hero {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .gauge,
+      .donut-wrap {
+        margin: 0 auto;
+        width: 156px;
+        height: 156px;
+      }
+
+      .score-display,
+      .hero-summary .stat-row,
+      .stack-legend,
+      .donut-legend {
+        justify-content: center;
+      }
+
+      .score-display .score-num {
+        font-size: 42px;
+      }
+
+      .gauge-text .pct {
+        font-size: 36px;
+      }
+
+      .ranges-table,
+      .leaderboard {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .day-row {
+        grid-template-columns: 80px 1fr 60px;
+      }
+      .day-time { display: none; }
+    }
+
+    .loading {
+      padding: 22px 14px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* === Overrides especificos para tema oscuro === */
+    [data-theme="dark"] .topbar {
+      background: rgba(15, 22, 38, 0.85);
+      border-bottom-color: var(--line);
+    }
+
+    [data-theme="dark"] .connect-wrap {
+      background:
+        radial-gradient(ellipse at top, rgba(96, 165, 250, 0.14) 0%, transparent 60%),
+        radial-gradient(ellipse at bottom, rgba(14, 165, 233, 0.08) 0%, transparent 60%);
+    }
+
+    [data-theme="dark"] .empty-state .empty-icon {
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(96, 165, 250, 0.06) 100%);
+      color: var(--primary);
+    }
+
+    [data-theme="dark"] .brand-mark {
+      box-shadow: 0 2px 8px rgba(96, 165, 250, 0.32);
+    }
+
+    [data-theme="dark"] .topbar .user-info {
+      background: var(--surface-soft);
+      color: var(--text);
+    }
+
+    /* Alertas en dark */
+    [data-theme="dark"] .alert-error { background: rgba(239, 68, 68, 0.12); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+    [data-theme="dark"] .alert-success { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.3); }
+    [data-theme="dark"] .alert-info { background: rgba(59, 130, 246, 0.12); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
+    [data-theme="dark"] .alert-warn { background: rgba(245, 158, 11, 0.12); color: #fcd34d; border-color: rgba(245, 158, 11, 0.3); }
+
+    /* Breakdown cards en dark */
+    [data-theme="dark"] .breakdown-card.idle { background: rgba(148, 163, 184, 0.1); border-color: rgba(148, 163, 184, 0.25); }
+    [data-theme="dark"] .breakdown-card.below { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
+    [data-theme="dark"] .breakdown-card.sweet { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+    [data-theme="dark"] .breakdown-card.above { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+    [data-theme="dark"] .breakdown-card .bc-time { color: var(--text); }
+    [data-theme="dark"] .breakdown-card.idle .bc-title { color: #cbd5e1; }
+    [data-theme="dark"] .breakdown-card.below .bc-title { color: #fcd34d; }
+    [data-theme="dark"] .breakdown-card.sweet .bc-title { color: #6ee7b7; }
+    [data-theme="dark"] .breakdown-card.above .bc-title { color: #fca5a5; }
+
+    /* Observaciones en dark */
+    [data-theme="dark"] .obs-item.alert { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border-color: rgba(245, 158, 11, 0.3); }
+    [data-theme="dark"] .obs-item.bad { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+    [data-theme="dark"] .obs-item.info { background: rgba(59, 130, 246, 0.1); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
+    [data-theme="dark"] .obs-item.ok { background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.3); }
+    [data-theme="dark"] .obs-item.action { background: rgba(148, 163, 184, 0.1); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.3); }
+
+    /* Grade badges en dark - usar fondos translucidos */
+    [data-theme="dark"] .grade-badge.grade-a { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    [data-theme="dark"] .grade-badge.grade-a .letter { color: #6ee7b7; background: rgba(0,0,0,0.3); }
+    [data-theme="dark"] .grade-badge.grade-b { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    [data-theme="dark"] .grade-badge.grade-b .letter { color: #93c5fd; background: rgba(0,0,0,0.3); }
+    [data-theme="dark"] .grade-badge.grade-c { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    [data-theme="dark"] .grade-badge.grade-c .letter { color: #fcd34d; background: rgba(0,0,0,0.3); }
+    [data-theme="dark"] .grade-badge.grade-d { background: rgba(234, 88, 12, 0.2); color: #fdba74; }
+    [data-theme="dark"] .grade-badge.grade-d .letter { color: #fdba74; background: rgba(0,0,0,0.3); }
+    [data-theme="dark"] .grade-badge.grade-f { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+    [data-theme="dark"] .grade-badge.grade-f .letter { color: #fca5a5; background: rgba(0,0,0,0.3); }
+
+    /* Score number colors en dark - mas brillantes */
+    [data-theme="dark"] .score-display .score-num.grade-a { color: #34d399; }
+    [data-theme="dark"] .score-display .score-num.grade-b { color: #60a5fa; }
+    [data-theme="dark"] .score-display .score-num.grade-c { color: #fbbf24; }
+    [data-theme="dark"] .score-display .score-num.grade-d { color: #fb923c; }
+    [data-theme="dark"] .score-display .score-num.grade-f { color: #f87171; }
+
+    /* Gauge text colors en dark */
+    [data-theme="dark"] .gauge.good .pct { color: #34d399; }
+    [data-theme="dark"] .gauge.warn .pct { color: #fbbf24; }
+    [data-theme="dark"] .gauge.bad .pct { color: #f87171; }
+
+    /* Fleet hero en dark */
+    [data-theme="dark"] .fleet-hero {
+      background: var(--hero-bg);
+      border-color: var(--hero-border);
+    }
+
+    /* Day pct colors en dark */
+    [data-theme="dark"] .day-pct.good { color: #34d399; }
+    [data-theme="dark"] .day-pct.warn { color: #fbbf24; }
+    [data-theme="dark"] .day-pct.bad { color: #f87171; }
+
+    /* Inputs en dark */
+    [data-theme="dark"] input[type="text"],
+    [data-theme="dark"] input[type="password"],
+    [data-theme="dark"] input[type="number"],
+    [data-theme="dark"] input[type="datetime-local"],
+    [data-theme="dark"] select {
+      background: var(--surface-soft);
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    [data-theme="dark"] input[type="text"]::placeholder,
+    [data-theme="dark"] input[type="password"]::placeholder {
+      color: var(--muted-soft);
+    }
+
+    /* Stack bar background en dark */
+    [data-theme="dark"] .stack-bar,
+    [data-theme="dark"] .day-bar,
+    [data-theme="dark"] .pct-bar,
+    [data-theme="dark"] .mini-bar,
+    [data-theme="dark"] .progress-bar {
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* Session details / footer info en dark */
+    [data-theme="dark"] .session-info,
+    [data-theme="dark"] .footer-info,
+    [data-theme="dark"] .sidebar-panel {
+      background: var(--surface-soft);
+      border-color: var(--line);
+    }
+
+    [data-theme="dark"] .empty-state,
+    [data-theme="dark"] #results-card,
+    [data-theme="dark"] #fleet-results-card,
+    [data-theme="dark"] #fleet-progress-card {
+      background: linear-gradient(180deg, #101b2d 0%, #0e1a2c 100%);
+    }
+
+    /* Donut wrap circle bg en dark */
+    [data-theme="dark"] .donut-wrap .donut-text .big {
+      color: var(--text);
+    }
+
+    /* Leaderboard en dark */
+    [data-theme="dark"] .leaderboard {
+      border-color: var(--line);
+    }
+    [data-theme="dark"] .leaderboard th {
+      background: var(--surface-soft);
+      color: var(--muted);
+    }
+    [data-theme="dark"] .leaderboard td {
+      border-bottom-color: var(--line);
+    }
+    [data-theme="dark"] .leaderboard tbody tr:hover {
+      background: var(--surface-soft);
+    }
+    [data-theme="dark"] .leaderboard .grade-pill { color: white; }
+
+    /* Brand title sub en dark */
+    [data-theme="dark"] .brand-title .sub { color: var(--muted); }
+
+    /* === Boton toggle de tema === */
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0 12px 0 0;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theme-toggle:hover {
+      background: var(--surface);
+      border-color: var(--line-strong);
+      color: var(--primary);
+      transform: rotate(15deg);
+    }
+
+    .theme-toggle svg { width: 18px; height: 18px; }
+
+    .theme-toggle .icon-moon { display: block; }
+    .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+    }
+
+    /* === Barra de acciones (imprimir, exportar) === */
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: -8px 0 16px 0;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--line);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      margin-top: 0;
+      transition: all 0.15s;
+    }
+
+    .btn-action:hover {
+      background: var(--surface-soft);
+      border-color: var(--line-strong);
+      color: var(--primary);
+    }
+
+    .btn-action svg { width: 15px; height: 15px; }
+
+    /* Elementos que solo aparecen al imprimir */
+    .print-header, .print-footer { display: none; }
+
+    /* === Estilos de impresion === */
+    @media print {
+      @page {
+        size: A4;
+        margin: 1cm;
+      }
+
+      html, body {
+        background: white !important;
+        color: black;
+        font-size: 9pt;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .topbar, .sidebar, .no-print,
+      .section-actions, #empty-state, #form-alert,
+      .nav-spacer, #fleet-progress-card,
+      .section-header,
+      #results-card > h2 {
+        display: none !important;
+      }
+
+      .app-shell {
+        display: block !important;
+        min-height: auto !important;
+        grid-template-columns: 1fr !important;
+      }
+
+      .main-content {
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+
+      .card {
+        box-shadow: none !important;
+        border: none !important;
+        margin-bottom: 8px !important;
+        padding: 0 !important;
+        animation: none !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+      }
+
+      /* === HERO compacto en print === */
+      .result-hero {
+        background: linear-gradient(135deg, #f0f9ff 0%, #ecfeff 100%) !important;
+        border: 1px solid #bae6fd !important;
+        page-break-inside: avoid;
+        padding: 12px 14px !important;
+        gap: 16px !important;
+        margin-bottom: 10px !important;
+        grid-template-columns: 110px 1fr !important;
+        border-radius: 8px !important;
+      }
+      .result-hero.warn {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+        border-color: #fde68a !important;
+      }
+      .result-hero.bad {
+        background: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%) !important;
+        border-color: #fecaca !important;
+      }
+
+      .gauge { width: 110px !important; height: 110px !important; }
+      .gauge svg { width: 110px !important; height: 110px !important; }
+      .gauge-text .pct { font-size: 26pt !important; }
+      .gauge-text .label { font-size: 7pt !important; }
+
+      .hero-summary .unit-name { font-size: 13pt !important; margin-bottom: 2px !important; }
+      .hero-summary .meta { font-size: 8pt !important; margin-bottom: 6px !important; }
+
+      .score-display { gap: 6px !important; margin-bottom: 2px !important; }
+      .score-display .score-num { font-size: 22pt !important; }
+      .score-display .score-unit { font-size: 10pt !important; }
+      .grade-badge { padding: 3px 8px !important; font-size: 9pt !important; }
+      .grade-badge .letter { width: 18px !important; height: 18px !important; font-size: 10pt !important; }
+
+      .hero-summary .stat-row { gap: 12px !important; margin-top: 6px !important; }
+      .hero-summary .stat .stat-label { font-size: 7pt !important; }
+      .hero-summary .stat .stat-value { font-size: 10pt !important; }
+
+      /* === Stack bar compacto === */
+      .stack-legend { gap: 10px !important; font-size: 7pt !important; margin-bottom: 4px !important; }
+      .stack-legend .dot { width: 8px !important; height: 8px !important; }
+      .stack-bar { height: 22px !important; margin: 4px 0 !important; }
+      .stack-bar .seg { font-size: 8pt !important; }
+
+      /* === Breakdown cards: 4 columnas siempre, compactas === */
+      .breakdown-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 6px !important;
+        margin-top: 8px !important;
+      }
+      .breakdown-card {
+        padding: 8px 10px !important;
+        border-radius: 6px !important;
+      }
+      .breakdown-card .bc-title { font-size: 7pt !important; margin-bottom: 2px !important; }
+      .breakdown-card .bc-range { font-size: 7pt !important; margin-bottom: 4px !important; }
+      .breakdown-card .bc-time { font-size: 13pt !important; margin-bottom: 2px !important; }
+      .breakdown-card .bc-pct { font-size: 8pt !important; }
+
+      /* === Observaciones compactas === */
+      .observations-section {
+        margin-top: 10px !important;
+        padding-top: 8px !important;
+      }
+      .observations-section h3 { font-size: 10pt !important; margin-bottom: 6px !important; }
+      .obs-list { gap: 4px !important; }
+      .obs-item { padding: 6px 9px !important; font-size: 8pt !important; line-height: 1.35 !important; }
+      .obs-item .obs-icon { width: 16px !important; height: 16px !important; font-size: 8pt !important; }
+
+      /* === Desglose diario compacto === */
+      .daily-section {
+        margin-top: 10px !important;
+        padding-top: 8px !important;
+      }
+      .daily-section h3 { font-size: 10pt !important; margin-bottom: 4px !important; }
+      .daily-section .hint { font-size: 7pt !important; margin-bottom: 6px !important; }
+      .day-row {
+        grid-template-columns: 80px 1fr 50px 70px !important;
+        gap: 8px !important;
+        padding: 4px 0 !important;
+      }
+      .day-label { font-size: 9pt !important; }
+      .day-label .dow { font-size: 7pt !important; }
+      .day-bar { height: 14px !important; }
+      .day-pct { font-size: 10pt !important; }
+      .day-time { font-size: 8pt !important; }
+
+      /* === Footer info compacto === */
+      .footer-info {
+        margin-top: 8px !important;
+        padding-top: 6px !important;
+        font-size: 7pt !important;
+        gap: 10px !important;
+      }
+
+      /* Colores garantizados al imprimir */
+      .gauge, .gauge svg, .donut-wrap, .donut-wrap svg,
+      .stack-bar, .day-bar, .pct-bar,
+      .breakdown-card, .obs-item, .grade-badge, .grade-pill,
+      .leaderboard, .leaderboard th, .leaderboard td,
+      .mini-bar, .progress-bar .fill, .score-display .score-num,
+      .seg, .dot, .stat-row, .stat, .result-hero,
+      .seg.below, .seg.sweet, .seg.above, .seg.idle,
+      .day-pct, .pct, .fill-arc {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .breakdown-card:hover { transform: none !important; box-shadow: none !important; }
+
+      /* Permitir que las secciones grandes se dividan si es necesario */
+      .observations-section, .daily-section { page-break-inside: auto; }
+      .obs-item, .day-row, .breakdown-card { page-break-inside: avoid; }
+
+      /* === Header de impresion === */
+      .print-header {
+        display: block !important;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1.5px solid #0f172a;
+      }
+      .print-header .ph-title {
+        font-size: 13pt;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 3px 0;
+      }
+      .print-header .ph-meta {
+        font-size: 8pt;
+        color: #475569;
+        line-height: 1.4;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <h1>
+      <span class="brand-mark">
+        <img src="logo.png" alt="Sweet Spot Monitor" />
+      </span>
+      <span class="brand-title">
+        <span class="name">Sweet Spot Monitor</span>
+        <span class="sub">Wialon Driving Analytics</span>
+      </span>
+    </h1>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="btn-theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+      <div class="user-info" id="user-info">
+        <span class="avatar" id="user-avatar">—</span>
+        <span id="user-name">Sin conexion</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pantalla de conexion (centrada, sin sidebar) -->
+  <div id="connect-screen" class="connect-wrap">
+    <div class="card connect-card">
+      <div class="connect-icon">
+        <img src="logo.png" alt="Sweet Spot Monitor" />
+      </div>
+      <h2>Conectar a Wialon</h2>
+      <p class="hint">Pega tu token de acceso para iniciar la sesion.</p>
+
+      <div id="connect-alert" aria-live="polite"></div>
+
+      <label for="token">Token de Wialon</label>
+      <input type="password" id="token" placeholder="Pega aqui tu token..." autocomplete="off" />
+
+      <button id="btn-connect">Conectar</button>
+    </div>
+  </div>
+
+  <!-- Pantalla principal con sidebar -->
+  <div id="main-screen" class="hidden app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-section">Secciones</div>
+      <div class="nav-item active" data-section="analisis" role="button" tabindex="0" aria-current="page">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"></path>
+            <path d="M7 14l4-4 4 4 5-5"></path>
+          </svg>
+        </span>
+        <span>Analisis individual</span>
+      </div>
+      <div class="nav-item" data-section="flota" role="button" tabindex="0">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </span>
+        <span>Analisis de flota</span>
+      </div>
+      <div class="nav-item" data-section="rangos" role="button" tabindex="0">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </span>
+        <span>Rangos Sweet Spot</span>
+      </div>
+
+      <!-- Panel de controles individual -->
+      <div class="sidebar-panel" id="controls-panel">
+        <div class="nav-section" style="padding: 0 0 8px 0;">Parametros</div>
+
+        <div id="form-alert" aria-live="polite"></div>
+
+        <div class="field">
+          <label for="unit-select">Unidad</label>
+          <select id="unit-select">
+            <option value="">Cargando...</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="date-from">Desde</label>
+          <input type="datetime-local" id="date-from" />
+        </div>
+
+        <div class="field">
+          <label for="date-to">Hasta</label>
+          <input type="datetime-local" id="date-to" />
+        </div>
+
+        <button id="btn-execute">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Ejecutar analisis
+        </button>
+      </div>
+
+      <!-- Panel de controles flota -->
+      <div class="sidebar-panel hidden" id="fleet-controls-panel">
+        <div class="nav-section" style="padding: 0 0 8px 0;">Parametros</div>
+
+        <div id="fleet-form-alert" aria-live="polite"></div>
+
+        <div class="field">
+          <label for="group-select">Grupo de unidades</label>
+          <select id="group-select">
+            <option value="">Cargando grupos...</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="fleet-date-from">Desde</label>
+          <input type="datetime-local" id="fleet-date-from" />
+        </div>
+
+        <div class="field">
+          <label for="fleet-date-to">Hasta</label>
+          <input type="datetime-local" id="fleet-date-to" />
+        </div>
+
+        <button id="btn-execute-fleet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Ejecutar analisis
+        </button>
+
+        <p class="hint" style="font-size: 11px; margin-top: 10px;">
+          Por rendimiento, recomendado rango maximo 3 dias para flotas grandes.
+        </p>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="nav-section">Sesion</div>
+      <div class="nav-item" id="btn-disconnect" role="button" tabindex="0">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </span>
+        <span>Desconectar</span>
+      </div>
+    </aside>
+
+    <!-- Contenido -->
+    <main class="main-content">
+
+      <!-- Seccion Analisis -->
+      <section class="section active" data-section="analisis">
+        <div class="section-header">
+          <h2>Analisis Sweet Spot</h2>
+          <div class="subtitle" id="session-details">Calcula el tiempo en RPM optimo de una unidad en un periodo dado.</div>
+        </div>
+
+        <!-- Header solo visible al imprimir -->
+        <div class="print-header" id="print-header-analisis"></div>
+
+        <!-- Acciones (visibles solo cuando hay resultados) -->
+        <div class="section-actions hidden" id="analysis-actions">
+          <button class="btn-action" id="btn-print-analysis" title="Imprimir o guardar como PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Imprimir / Guardar PDF
+          </button>
+        </div>
+
+        <!-- Estado vacio cuando no hay resultados -->
+        <div id="empty-state" class="card empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v18h18"></path>
+              <path d="M7 14l4-4 4 4 5-5"></path>
+            </svg>
+          </div>
+          <h3>Sin analisis ejecutado</h3>
+          <p>Selecciona una unidad y un rango de fechas en el panel de la izquierda, luego presiona <strong>Ejecutar analisis</strong>.</p>
+        </div>
+
+        <!-- Resultados (oculto hasta ejecutar) -->
+        <div class="card hidden" id="results-card">
+          <h2>Resultados</h2>
+          <div id="results-content" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Seccion Flota -->
+      <section class="section" data-section="flota">
+        <div class="section-header">
+          <h2>Analisis de flota</h2>
+          <div class="subtitle">Evalua un grupo completo de unidades y obten leaderboard con scores.</div>
+        </div>
+
+        <div id="fleet-empty-state" class="card empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3>Sin analisis ejecutado</h3>
+          <p>Selecciona un grupo y un rango de fechas en el panel de la izquierda, luego presiona <strong>Ejecutar analisis</strong>.</p>
+        </div>
+
+        <div class="card hidden" id="fleet-progress-card">
+          <div id="fleet-progress-content" aria-live="polite"></div>
+        </div>
+
+        <div class="card hidden" id="fleet-results-card">
+          <div id="fleet-results-content" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Seccion Rangos -->
+      <section class="section" data-section="rangos">
+        <div class="section-header">
+          <h2>Rangos Sweet Spot por tipo de vehiculo</h2>
+          <div class="subtitle">Define el rango optimo de RPM para cada tipo de vehiculo. Si una unidad no tiene tipo en su Profile de Wialon, se usa el rango "Default".</div>
+        </div>
+
+        <div class="card">
+          <table class="ranges-table">
+            <thead>
+              <tr>
+                <th>Tipo de vehiculo</th>
+                <th>RPM minimo</th>
+                <th>RPM maximo</th>
+              </tr>
+            </thead>
+            <tbody id="ranges-tbody"></tbody>
+          </table>
+
+          <div class="actions-row" style="margin-top: 16px;">
+            <button class="btn-secondary btn-small" id="btn-reset-ranges">Restaurar valores por defecto</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const DEFAULT_WIALON_HOST = "https://hst-api.wialon.com";
+    const STORAGE_KEY = "sweetspot_rpm_ranges_v1";
+    const THEME_KEY = "sweetspot_theme_v1";
+
+    // === Detectar SID / host desde URL (cuando Wialon nos abre como app) ===
+    // Wialon pasa parametros como ?sid=...&user=...&hosturl=...&lang=...
+    function getUrlParam(name) {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+      } catch (e) { return null; }
+    }
+
+    const URL_SID = getUrlParam("sid") || getUrlParam("access_token");
+    const URL_HOST = getUrlParam("hosturl") || getUrlParam("baseUrl");
+    const WIALON_HOST = URL_HOST ? URL_HOST.replace(/\/$/, "") : DEFAULT_WIALON_HOST;
+    const HAS_WIALON_SESSION = !!URL_SID;
+
+    // === Tema: aplicar antes que cualquier render ===
+    (function initTheme() {
+      try {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          document.documentElement.setAttribute("data-theme", saved);
+        }
+      } catch (e) { /* ignore */ }
+    })();
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* ignore */ }
+    }
+
+    // Rangos por defecto (basados en lo que vimos en el Profile de Wialon)
+    const DEFAULT_RANGES = {
+      "Pickup":          { min: 1500, max: 2500 },
+      "Van":             { min: 1500, max: 2400 },
+      "Truck":           { min: 1200, max: 1800 },
+      "Heavy truck":     { min: 1100, max: 1600 },
+      "Dump truck":      { min: 1100, max: 1700 },
+      "Passenger":       { min: 1500, max: 2500 },
+      "Special machinery": { min: 1200, max: 2000 },
+      "Default":         { min: 1200, max: 2000 },
+    };
+
+    // Estado de la app
+    const state = {
+      ranges: loadRanges(),
+      currentUser: null,
+    };
+
+    const els = {
+      connectScreen: document.getElementById("connect-screen"),
+      mainScreen: document.getElementById("main-screen"),
+      tokenInput: document.getElementById("token"),
+      btnConnect: document.getElementById("btn-connect"),
+      btnDisconnect: document.getElementById("btn-disconnect"),
+      connectAlert: document.getElementById("connect-alert"),
+      userInfo: document.getElementById("user-info"),
+      sessionDetails: document.getElementById("session-details"),
+
+      rangesTbody: document.getElementById("ranges-tbody"),
+      btnResetRanges: document.getElementById("btn-reset-ranges"),
+
+      unitSelect: document.getElementById("unit-select"),
+      dateFrom: document.getElementById("date-from"),
+      dateTo: document.getElementById("date-to"),
+      btnExecute: document.getElementById("btn-execute"),
+      formAlert: document.getElementById("form-alert"),
+
+      resultsCard: document.getElementById("results-card"),
+      resultsContent: document.getElementById("results-content"),
+
+      // Flota
+      groupSelect: document.getElementById("group-select"),
+      fleetDateFrom: document.getElementById("fleet-date-from"),
+      fleetDateTo: document.getElementById("fleet-date-to"),
+      btnExecuteFleet: document.getElementById("btn-execute-fleet"),
+      fleetFormAlert: document.getElementById("fleet-form-alert"),
+      fleetEmptyState: document.getElementById("fleet-empty-state"),
+      fleetProgressCard: document.getElementById("fleet-progress-card"),
+      fleetProgressContent: document.getElementById("fleet-progress-content"),
+      fleetResultsCard: document.getElementById("fleet-results-card"),
+      fleetResultsContent: document.getElementById("fleet-results-content"),
+    };
+
+    // ----------------------------------------------------------------
+    // Utilidades
+    // ----------------------------------------------------------------
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str == null ? "" : String(str);
+      return div.innerHTML;
+    }
+
+    function showAlert(container, type, message) {
+      container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    }
+
+    function clearAlert(container) {
+      container.innerHTML = "";
+    }
+
+    // Calcula score compuesto 0-100 a partir de las metricas
+    function computeScore(r) {
+      const drivingSec = r.sweetSec + r.belowSec + r.aboveSec;
+      const pctSweet = drivingSec > 0 ? (r.sweetSec / drivingSec) * 100 : 0;
+      const pctIdleTotal = r.totalEngineSec > 0 ? (r.idleSec / r.totalEngineSec) * 100 : 0;
+
+      // Componente principal (85%): % en sweet spot sobre conduccion
+      // Componente ralenti (15%): penaliza si excede 15% del tiempo total
+      // Idle component: 100 cuando idle <= 15%, baja linealmente, 0 cuando idle >= 65%
+      const idleComponent = Math.max(0, 100 - Math.max(0, pctIdleTotal - 15) * 2);
+
+      const score = pctSweet * 0.85 + idleComponent * 0.15;
+      return Math.round(score * 10) / 10;
+    }
+
+    // Devuelve { letter, label, cssClass } segun el score
+    function gradeFromScore(score) {
+      if (score >= 85) return { letter: "A", label: "Excelente", cssClass: "grade-a" };
+      if (score >= 70) return { letter: "B", label: "Bueno",     cssClass: "grade-b" };
+      if (score >= 55) return { letter: "C", label: "Aceptable", cssClass: "grade-c" };
+      if (score >= 40) return { letter: "D", label: "Deficiente",cssClass: "grade-d" };
+      return            { letter: "F", label: "Critico",   cssClass: "grade-f" };
+    }
+
+    function formatHMS(seconds) {
+      if (!isFinite(seconds) || seconds <= 0) return "0s";
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = Math.floor(seconds % 60);
+      const parts = [];
+      if (h > 0) parts.push(h + "h");
+      if (m > 0) parts.push(m + "m");
+      if (s > 0 || parts.length === 0) parts.push(s + "s");
+      return parts.join(" ");
+    }
+
+    function toUnixSeconds(localDateTimeString) {
+      // input value de datetime-local viene sin zona horaria,
+      // interpretamos como hora local del navegador
+      const d = new Date(localDateTimeString);
+      return Math.floor(d.getTime() / 1000);
+    }
+
+    function defaultDateRange() {
+      const now = new Date();
+      const from = new Date(now);
+      from.setDate(from.getDate() - 1);
+      from.setHours(0, 0, 0, 0);
+      const to = new Date(now);
+      to.setDate(to.getDate() - 1);
+      to.setHours(23, 59, 59, 0);
+      return { from, to };
+    }
+
+    function toLocalInputValue(d) {
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // ----------------------------------------------------------------
+    // Rangos (localStorage)
+    // ----------------------------------------------------------------
+
+    function loadRanges() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Merge para asegurar que estan todos los tipos default
+          return { ...DEFAULT_RANGES, ...parsed };
+        }
+      } catch (e) { console.warn("No se pudo leer rangos del storage:", e); }
+      return { ...DEFAULT_RANGES };
+    }
+
+    function saveRanges() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.ranges)); }
+      catch (e) { console.warn("No se pudo guardar rangos:", e); }
+    }
+
+    function renderRanges() {
+      const types = Object.keys(state.ranges);
+      els.rangesTbody.innerHTML = types.map(function(type) {
+        const r = state.ranges[type];
+        return `
+          <tr data-type="${escapeHtml(type)}">
+            <td><strong>${escapeHtml(type)}</strong></td>
+            <td><input type="number" class="range-min" value="${r.min}" min="0" max="9000" /></td>
+            <td><input type="number" class="range-max" value="${r.max}" min="0" max="9000" /></td>
+          </tr>
+        `;
+      }).join("");
+
+      els.rangesTbody.querySelectorAll("tr").forEach(function(tr) {
+        const type = tr.dataset.type;
+        tr.querySelector(".range-min").addEventListener("change", function(e) {
+          state.ranges[type].min = Number(e.target.value);
+          saveRanges();
+        });
+        tr.querySelector(".range-max").addEventListener("change", function(e) {
+          state.ranges[type].max = Number(e.target.value);
+          saveRanges();
+        });
+      });
+    }
+
+    function getRangeForVehicleType(vehicleType) {
+      if (!vehicleType) return state.ranges["Default"];
+      // Busqueda case-insensitive
+      const key = Object.keys(state.ranges).find(function(k) {
+        return k.toLowerCase() === String(vehicleType).toLowerCase();
+      });
+      if (key) return state.ranges[key];
+      // Busqueda parcial (ej. "Truck (from 3.5 to 12 tonnes)" matchea con "Truck")
+      const lower = String(vehicleType).toLowerCase();
+      const partial = Object.keys(state.ranges).find(function(k) {
+        return lower.includes(k.toLowerCase()) || k.toLowerCase().includes(lower);
+      });
+      if (partial) return state.ranges[partial];
+      return state.ranges["Default"];
+    }
+
+    // ----------------------------------------------------------------
+    // Conexion Wialon
+    // ----------------------------------------------------------------
+
+    function connect() {
+      const token = els.tokenInput.value.trim();
+      if (!token) {
+        showAlert(els.connectAlert, "error", "Debes ingresar un token.");
+        return;
+      }
+
+      clearAlert(els.connectAlert);
+      els.btnConnect.disabled = true;
+      els.btnConnect.textContent = "Conectando...";
+
+      const session = wialon.core.Session.getInstance();
+      session.initSession(WIALON_HOST);
+
+      session.loginToken(token, "", function(code) {
+        els.btnConnect.disabled = false;
+        els.btnConnect.textContent = "Conectar";
+
+        if (code) {
+          const errMsg = wialon.core.Errors.getErrorText(code);
+          showAlert(els.connectAlert, "error", `Error al conectar: ${errMsg} (codigo ${code})`);
+          return;
+        }
+
+        const user = session.getCurrUser();
+        if (!user) {
+          showAlert(els.connectAlert, "error", "Sesion iniciada pero no se obtuvo el usuario.");
+          return;
+        }
+
+        state.currentUser = user;
+        showMainScreen(user);
+      });
+    }
+
+    function disconnect() {
+      const session = wialon.core.Session.getInstance();
+      session.logout(function() {
+        state.currentUser = null;
+        els.mainScreen.classList.add("hidden");
+        els.connectScreen.classList.remove("hidden");
+        const userNameEl = document.getElementById("user-name");
+        const avatarEl = document.getElementById("user-avatar");
+        if (userNameEl) userNameEl.textContent = "Sin conexion";
+        if (avatarEl) avatarEl.textContent = "—";
+        els.tokenInput.value = "";
+        clearAlert(els.connectAlert);
+      });
+    }
+
+    // Auto-conexion cuando la app es abierta desde Wialon (con ?sid= en URL)
+    function autoConnectFromUrl() {
+      if (!HAS_WIALON_SESSION) return;
+
+      // Mostrar pantalla de conexion con mensaje de auto-conectando
+      els.tokenInput.value = "";
+      els.tokenInput.disabled = true;
+      els.btnConnect.disabled = true;
+      els.btnConnect.textContent = "Conectando con Wialon...";
+      showAlert(els.connectAlert, "info",
+        "Sesion detectada desde Wialon. Conectando automaticamente...");
+
+      const session = wialon.core.Session.getInstance();
+      session.initSession(WIALON_HOST);
+
+      session.loginToken(URL_SID, "", function(code) {
+        els.tokenInput.disabled = false;
+        els.btnConnect.disabled = false;
+        els.btnConnect.textContent = "Conectar";
+
+        if (code) {
+          const errMsg = wialon.core.Errors.getErrorText(code);
+          showAlert(els.connectAlert, "error",
+            `Auto-conexion fallo: ${errMsg} (codigo ${code}). Puedes intentar con un token manual.`);
+          return;
+        }
+
+        const user = session.getCurrUser();
+        if (!user) {
+          showAlert(els.connectAlert, "error",
+            "Auto-conexion fallo: no se obtuvo el usuario.");
+          return;
+        }
+
+        state.currentUser = user;
+        showMainScreen(user);
+      });
+    }
+
+    function showMainScreen(user) {
+      els.connectScreen.classList.add("hidden");
+      els.mainScreen.classList.remove("hidden");
+
+      const userName = user.getName();
+      const userNameEl = document.getElementById("user-name");
+      const avatarEl = document.getElementById("user-avatar");
+      if (userNameEl) userNameEl.textContent = userName;
+      if (avatarEl) avatarEl.textContent = (userName || "?").charAt(0).toUpperCase();
+
+      els.sessionDetails.textContent =
+        "Calcula el tiempo en RPM optimo de una unidad en un periodo dado.";
+
+      // Inicializar rangos en UI
+      renderRanges();
+
+      // Inicializar fechas por defecto
+      const { from, to } = defaultDateRange();
+      els.dateFrom.value = toLocalInputValue(from);
+      els.dateTo.value = toLocalInputValue(to);
+
+      // Asegurar que arrancamos en la seccion Analisis
+      switchSection("analisis");
+
+      // Cargar unidades
+      loadUnits();
+    }
+
+    // ----------------------------------------------------------------
+    // Cargar unidades
+    // ----------------------------------------------------------------
+
+    function loadUnits() {
+      els.unitSelect.innerHTML = '<option value="">Cargando unidades...</option>';
+      els.groupSelect.innerHTML = '<option value="">Cargando grupos...</option>';
+
+      const session = wialon.core.Session.getInstance();
+
+      try {
+        session.loadLibrary("itemIcon");
+        session.loadLibrary("itemCustomFields");
+        session.loadLibrary("itemProfileFields");
+        session.loadLibrary("unitSensors");
+        session.loadLibrary("unitMessages");
+        session.loadLibrary("unitGroups");
+      } catch (e) {
+        console.error("Error cargando librerias:", e);
+      }
+
+      const FLAG_BASE = 1;
+      const FLAG_SENSORS = 4096;
+      const FLAG_PROFILE_FIELDS = 256;
+      const FLAG_LAST_MESSAGE = 1024;
+      const FLAG_UNITGROUP_UNITS = 1024;
+
+      const unitFlags = FLAG_BASE | FLAG_SENSORS | FLAG_PROFILE_FIELDS | FLAG_LAST_MESSAGE;
+      const groupFlags = FLAG_BASE | FLAG_UNITGROUP_UNITS;
+
+      session.updateDataFlags(
+        [
+          { type: "type", data: "avl_unit",       flags: unitFlags,  mode: 0 },
+          { type: "type", data: "avl_unit_group", flags: groupFlags, mode: 0 },
+        ],
+        function(code) {
+          if (code) {
+            const errMsg = wialon.core.Errors.getErrorText(code);
+            els.unitSelect.innerHTML = `<option value="">Error: ${escapeHtml(errMsg)}</option>`;
+            els.groupSelect.innerHTML = `<option value="">Error: ${escapeHtml(errMsg)}</option>`;
+            return;
+          }
+
+          const units = session.getItems("avl_unit") || [];
+          if (units.length === 0) {
+            els.unitSelect.innerHTML = '<option value="">No hay unidades disponibles</option>';
+          } else {
+            const sortedUnits = units.slice().sort(function(a, b) {
+              return a.getName().localeCompare(b.getName());
+            });
+            els.unitSelect.innerHTML = '<option value="">Selecciona una unidad...</option>' +
+              sortedUnits.map(function(u) {
+                return `<option value="${u.getId()}">${escapeHtml(u.getName())}</option>`;
+              }).join("");
+          }
+
+          const groups = session.getItems("avl_unit_group") || [];
+          const groupsWithUnits = groups.filter(function(g) {
+            const uids = g.getUnits() || [];
+            return uids.length > 0;
+          });
+
+          let groupOpts = '<option value="">Selecciona un grupo...</option>';
+          groupOpts += `<option value="__ALL__">Todas las unidades (${units.length})</option>`;
+
+          if (groupsWithUnits.length > 0) {
+            const sortedGroups = groupsWithUnits.slice().sort(function(a, b) {
+              return a.getName().localeCompare(b.getName());
+            });
+            groupOpts += sortedGroups.map(function(g) {
+              const count = (g.getUnits() || []).length;
+              return `<option value="${g.getId()}">${escapeHtml(g.getName())} (${count})</option>`;
+            }).join("");
+          }
+
+          els.groupSelect.innerHTML = groupOpts;
+
+          // Inicializar fechas por defecto para flota tambien
+          const { from, to } = defaultDateRange();
+          els.fleetDateFrom.value = toLocalInputValue(from);
+          els.fleetDateTo.value = toLocalInputValue(to);
+        }
+      );
+    }
+
+    // ----------------------------------------------------------------
+    // Logica del Sweet Spot
+    // ----------------------------------------------------------------
+
+    function findRpmSensor(unit) {
+      // Wialon sensor types relevantes para RPM
+      const RPM_TYPES = ["engine revs", "engine_revs"];
+
+      const sensors = unit.getSensors() || {};
+      const ids = Object.keys(sensors);
+
+      for (let i = 0; i < ids.length; i++) {
+        const s = sensors[ids[i]];
+        if (!s) continue;
+        const type = String(s.t || "").toLowerCase();
+        if (RPM_TYPES.indexOf(type) !== -1) return s;
+      }
+
+      // Fallback: buscar por nombre que contenga "rpm"
+      for (let i = 0; i < ids.length; i++) {
+        const s = sensors[ids[i]];
+        if (!s) continue;
+        const name = String(s.n || "").toLowerCase();
+        if (name.indexOf("rpm") !== -1 || name.indexOf("revolution") !== -1) return s;
+      }
+
+      return null;
+    }
+
+    function getVehicleType(unit) {
+      const fields = unit.getProfileFields() || [];
+      // Los profile fields vienen como objeto {id: {id, n, v}}
+      const arr = Array.isArray(fields) ? fields : Object.values(fields);
+
+      for (let i = 0; i < arr.length; i++) {
+        const f = arr[i];
+        const name = String(f.n || "").toLowerCase();
+        if (name === "vehicle_class" || name === "vehicle_type" || name === "vehicle type" || name === "vehicle class") {
+          return f.v;
+        }
+      }
+      return null;
+    }
+
+    function calculateSweetSpot(messages, sensor, unit, range) {
+      const SPEED_STOPPED_KMH = 3; // velocidad menor a esto se considera parado
+
+      let totalEngineSec = 0;
+      let idleSec = 0;     // motor encendido + parado
+      let sweetSec = 0;    // RPM en rango (manejando)
+      let belowSec = 0;    // RPM bajo + manejando (lugging)
+      let aboveSec = 0;    // RPM alto + manejando (sobre-revolucion)
+      let evaluatedMessages = 0;
+      let invalidMessages = 0;
+
+      const daily = {};
+
+      function dayKey(unixSec) {
+        const d = new Date(unixSec * 1000);
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      }
+
+      function ensureDay(key) {
+        if (!daily[key]) {
+          daily[key] = { totalEngineSec: 0, idleSec: 0, sweetSec: 0, belowSec: 0, aboveSec: 0 };
+        }
+        return daily[key];
+      }
+
+      if (!messages || messages.length < 2) {
+        return {
+          totalEngineSec: 0, idleSec: 0, sweetSec: 0, belowSec: 0, aboveSec: 0,
+          evaluatedMessages: 0, invalidMessages: 0,
+          totalMessages: messages ? messages.length : 0, daily: {},
+        };
+      }
+
+      const sorted = messages.slice().sort(function(a, b) { return a.t - b.t; });
+
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const msg = sorted[i];
+        const next = sorted[i + 1];
+        const dt = next.t - msg.t;
+
+        if (dt <= 0 || dt > 3600) continue;
+
+        let rpm;
+        try {
+          rpm = unit.calculateSensorValue(sensor, msg);
+        } catch (e) {
+          invalidMessages++;
+          continue;
+        }
+
+        if (rpm === undefined || rpm === null || rpm === -348201.3876) {
+          invalidMessages++;
+          continue;
+        }
+
+        evaluatedMessages++;
+
+        if (rpm <= 0) continue;
+
+        // Velocidad del mensaje (km/h). Si no hay posicion, asumimos parado.
+        const speed = (msg.pos && typeof msg.pos.s === "number") ? msg.pos.s : 0;
+        const isMoving = speed >= SPEED_STOPPED_KMH;
+
+        const dayBucket = ensureDay(dayKey(msg.t));
+
+        totalEngineSec += dt;
+        dayBucket.totalEngineSec += dt;
+
+        if (!isMoving) {
+          // Motor encendido pero parado = ralenti (no cuenta como conduccion)
+          idleSec += dt;
+          dayBucket.idleSec += dt;
+        } else if (rpm < range.min) {
+          // Manejando con RPM bajo = lugging
+          belowSec += dt;
+          dayBucket.belowSec += dt;
+        } else if (rpm > range.max) {
+          aboveSec += dt;
+          dayBucket.aboveSec += dt;
+        } else {
+          sweetSec += dt;
+          dayBucket.sweetSec += dt;
+        }
+      }
+
+      return {
+        totalEngineSec, idleSec, sweetSec, belowSec, aboveSec,
+        evaluatedMessages, invalidMessages, totalMessages: sorted.length, daily,
+      };
+    }
+
+    function loadMessagesAndCalculate(unit, fromUnix, toUnix, callback) {
+      const session = wialon.core.Session.getInstance();
+      const ml = session.getMessagesLoader();
+
+      console.log("Cargando mensajes:", {
+        unitId: unit.getId(),
+        unitName: unit.getName(),
+        fromUnix: fromUnix,
+        toUnix: toUnix,
+        fromDate: new Date(fromUnix * 1000).toString(),
+        toDate: new Date(toUnix * 1000).toString(),
+      });
+
+      // Limpiar cualquier carga previa
+      ml.unload(function() {
+        // Flags: data messages (tipo 0). Mask 0xFF00 matchea solo los bits de tipo.
+        // loadCount 0 = todos los mensajes en el intervalo
+        ml.loadInterval(
+          unit.getId(),
+          fromUnix,
+          toUnix,
+          0x0000,
+          0xFF00,
+          0,
+          function(code, data) {
+            console.log("loadInterval respuesta - code:", code, "data:", data);
+
+            if (code) {
+              callback(new Error(wialon.core.Errors.getErrorText(code) + " (codigo " + code + ")"), null);
+              return;
+            }
+
+            // data puede ser un numero (cantidad de mensajes) o un objeto con .messages
+            const count = typeof data === "number" ? data : (data && data.count) || 0;
+            console.log("Cantidad reportada por loadInterval:", count);
+
+            if (count === 0) {
+              callback(null, { messages: [] });
+              return;
+            }
+
+            // Cargar los mensajes ya cargados en el rango
+            ml.getMessages(0, count - 1, function(code2, messages) {
+              console.log("getMessages respuesta - code:", code2, "primeros 3 mensajes:", messages && messages.slice(0, 3));
+
+              if (code2) {
+                callback(new Error(wialon.core.Errors.getErrorText(code2) + " (codigo " + code2 + ")"), null);
+                return;
+              }
+              callback(null, { messages: messages || [] });
+            });
+          }
+        );
+      });
+    }
+
+    // ----------------------------------------------------------------
+    // Ejecutar analisis
+    // ----------------------------------------------------------------
+
+    function executeAnalysis() {
+      clearAlert(els.formAlert);
+
+      const unitId = Number(els.unitSelect.value);
+      if (!unitId) {
+        showAlert(els.formAlert, "error", "Selecciona una unidad.");
+        return;
+      }
+
+      const fromValue = els.dateFrom.value;
+      const toValue = els.dateTo.value;
+      if (!fromValue || !toValue) {
+        showAlert(els.formAlert, "error", "Selecciona el rango de fechas.");
+        return;
+      }
+
+      const fromUnix = toUnixSeconds(fromValue);
+      const toUnix = toUnixSeconds(toValue);
+      if (toUnix <= fromUnix) {
+        showAlert(els.formAlert, "error", "La fecha 'Hasta' debe ser mayor que 'Desde'.");
+        return;
+      }
+      if (toUnix - fromUnix > 7 * 24 * 3600) {
+        showAlert(els.formAlert, "error", "El rango maximo permitido es 7 dias.");
+        return;
+      }
+
+      const session = wialon.core.Session.getInstance();
+      const unit = session.getItem(unitId);
+      if (!unit) {
+        showAlert(els.formAlert, "error", "No se pudo obtener la unidad.");
+        return;
+      }
+
+      const sensor = findRpmSensor(unit);
+      if (!sensor) {
+        renderNoSensorResult(unit);
+        return;
+      }
+
+      const vehicleType = getVehicleType(unit);
+      const range = getRangeForVehicleType(vehicleType);
+
+      els.btnExecute.disabled = true;
+      els.btnExecute.textContent = "Calculando...";
+      const emptyState = document.getElementById("empty-state");
+      if (emptyState) emptyState.classList.add("hidden");
+      els.resultsCard.classList.remove("hidden");
+      els.resultsContent.innerHTML = '<div class="loading">Cargando mensajes del intervalo...</div>';
+
+      loadMessagesAndCalculate(unit, fromUnix, toUnix, function(err, data) {
+        els.btnExecute.disabled = false;
+        els.btnExecute.textContent = "Ejecutar analisis";
+
+        if (err) {
+          els.resultsContent.innerHTML = `<div class="alert alert-error">Error cargando mensajes: ${escapeHtml(err.message)}</div>`;
+          return;
+        }
+
+        const messages = (data && data.messages) || [];
+        const result = calculateSweetSpot(messages, sensor, unit, range);
+
+        renderResult(unit, sensor, vehicleType, range, result, fromUnix, toUnix);
+      });
+    }
+
+    // ----------------------------------------------------------------
+    // Render de resultados
+    // ----------------------------------------------------------------
+
+    // ----------------------------------------------------------------
+    // Analisis de flota
+    // ----------------------------------------------------------------
+
+    function executeFleetAnalysis() {
+      clearAlert(els.fleetFormAlert);
+
+      const groupId = els.groupSelect.value;
+      if (!groupId) {
+        showAlert(els.fleetFormAlert, "error", "Selecciona un grupo.");
+        return;
+      }
+
+      const fromValue = els.fleetDateFrom.value;
+      const toValue = els.fleetDateTo.value;
+      if (!fromValue || !toValue) {
+        showAlert(els.fleetFormAlert, "error", "Selecciona el rango de fechas.");
+        return;
+      }
+
+      const fromUnix = toUnixSeconds(fromValue);
+      const toUnix = toUnixSeconds(toValue);
+      if (toUnix <= fromUnix) {
+        showAlert(els.fleetFormAlert, "error", "La fecha 'Hasta' debe ser mayor que 'Desde'.");
+        return;
+      }
+      if (toUnix - fromUnix > 7 * 24 * 3600) {
+        showAlert(els.fleetFormAlert, "error", "El rango maximo permitido es 7 dias.");
+        return;
+      }
+
+      const session = wialon.core.Session.getInstance();
+
+      // Determinar lista de unidades a analizar
+      let unitIds;
+      if (groupId === "__ALL__") {
+        unitIds = (session.getItems("avl_unit") || []).map(function(u) { return u.getId(); });
+      } else {
+        const group = session.getItem(Number(groupId));
+        if (!group) {
+          showAlert(els.fleetFormAlert, "error", "No se pudo obtener el grupo.");
+          return;
+        }
+        unitIds = (group.getUnits() || []).slice();
+      }
+
+      if (unitIds.length === 0) {
+        showAlert(els.fleetFormAlert, "error", "El grupo no tiene unidades.");
+        return;
+      }
+
+      // Mostrar progreso, ocultar empty y resultados previos
+      els.fleetEmptyState.classList.add("hidden");
+      els.fleetResultsCard.classList.add("hidden");
+      els.fleetProgressCard.classList.remove("hidden");
+      els.btnExecuteFleet.disabled = true;
+      els.btnExecuteFleet.textContent = "Procesando...";
+
+      const total = unitIds.length;
+      const fleetResults = [];
+
+      function renderProgress(currentIndex, currentName) {
+        const pct = total > 0 ? Math.round(((currentIndex) / total) * 100) : 0;
+        els.fleetProgressContent.innerHTML = `
+          <div class="fleet-progress">
+            <h3>Analizando flota...</h3>
+            <div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>
+            <div class="progress-text">${currentIndex} / ${total} unidades · ${escapeHtml(currentName || "")}</div>
+          </div>
+        `;
+      }
+
+      function processNext(i) {
+        if (i >= total) {
+          els.btnExecuteFleet.disabled = false;
+          els.btnExecuteFleet.textContent = "Ejecutar analisis";
+          els.fleetProgressCard.classList.add("hidden");
+          renderFleetResults(fleetResults, fromUnix, toUnix);
+          return;
+        }
+
+        const unitId = unitIds[i];
+        const unit = session.getItem(unitId);
+        if (!unit) {
+          fleetResults.push({ unitId: unitId, unitName: "Unit " + unitId, skipReason: "Unidad no disponible" });
+          processNext(i + 1);
+          return;
+        }
+
+        renderProgress(i, unit.getName());
+
+        const sensor = findRpmSensor(unit);
+        if (!sensor) {
+          fleetResults.push({ unitId: unitId, unitName: unit.getName(), skipReason: "Sin sensor de RPM" });
+          processNext(i + 1);
+          return;
+        }
+
+        const vehicleType = getVehicleType(unit);
+        const range = getRangeForVehicleType(vehicleType);
+
+        loadMessagesAndCalculate(unit, fromUnix, toUnix, function(err, data) {
+          if (err) {
+            fleetResults.push({ unitId: unitId, unitName: unit.getName(), skipReason: "Error: " + err.message });
+            processNext(i + 1);
+            return;
+          }
+          const messages = (data && data.messages) || [];
+          const result = calculateSweetSpot(messages, sensor, unit, range);
+          const score = computeScore(result);
+          const grade = gradeFromScore(score);
+
+          fleetResults.push({
+            unitId: unitId, unitName: unit.getName(),
+            vehicleType: vehicleType, range: range,
+            result: result, score: score, grade: grade,
+          });
+          processNext(i + 1);
+        });
+      }
+
+      renderProgress(0, "iniciando...");
+      processNext(0);
+    }
+
+    function renderFleetResults(results, fromUnix, toUnix) {
+      // Separar unidades evaluadas y omitidas
+      const evaluated = results.filter(function(r) { return !r.skipReason && r.result.totalEngineSec > 0; });
+      const noActivity = results.filter(function(r) { return !r.skipReason && r.result.totalEngineSec === 0; });
+      const skipped = results.filter(function(r) { return r.skipReason; });
+
+      els.fleetResultsCard.classList.remove("hidden");
+
+      if (evaluated.length === 0) {
+        els.fleetResultsContent.innerHTML = `
+          <div class="alert alert-warn">
+            Ninguna unidad del grupo tuvo actividad evaluable en el periodo seleccionado.
+            ${skipped.length > 0 ? `<br>${skipped.length} omitidas por: ${escapeHtml(skipped[0].skipReason)}` : ''}
+          </div>
+        `;
+        return;
+      }
+
+      // Calcular distribucion por grado
+      const dist = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+      let avgScore = 0;
+      evaluated.forEach(function(r) {
+        dist[r.grade.letter]++;
+        avgScore += r.score;
+      });
+      avgScore = avgScore / evaluated.length;
+      const fleetGrade = gradeFromScore(avgScore);
+
+      // Ordenar por score descendente
+      const ranked = evaluated.slice().sort(function(a, b) { return b.score - a.score; });
+
+      const fromDate = new Date(fromUnix * 1000);
+      const toDate = new Date(toUnix * 1000);
+
+      els.fleetResultsContent.innerHTML = `
+        <div class="fleet-hero">
+          ${renderDonut(dist, evaluated.length, fleetGrade)}
+          <div>
+            <div class="fleet-summary-title">Resumen de flota</div>
+            <div class="fleet-summary-meta">
+              Periodo: ${escapeHtml(fromDate.toLocaleDateString())} - ${escapeHtml(toDate.toLocaleDateString())} ·
+              ${evaluated.length} unidades evaluadas${noActivity.length > 0 ? ` · ${noActivity.length} sin actividad` : ''}${skipped.length > 0 ? ` · ${skipped.length} omitidas` : ''}
+            </div>
+            <div class="donut-legend">
+              <div class="item"><span class="dot" style="background:#10b981;"></span><span class="count">${dist.A}</span> Excelente (A) · score >= 85</div>
+              <div class="item"><span class="dot" style="background:#3b82f6;"></span><span class="count">${dist.B}</span> Bueno (B) · 70-84</div>
+              <div class="item"><span class="dot" style="background:#f59e0b;"></span><span class="count">${dist.C}</span> Aceptable (C) · 55-69</div>
+              <div class="item"><span class="dot" style="background:#ea580c;"></span><span class="count">${dist.D}</span> Deficiente (D) · 40-54</div>
+              <div class="item"><span class="dot" style="background:#ef4444;"></span><span class="count">${dist.F}</span> Critico (F) · <40</div>
+            </div>
+          </div>
+        </div>
+
+        ${renderFleetObservations(evaluated, dist, avgScore, ranked, skipped, noActivity)}
+
+        <h3 class="leaderboard-title">Ranking de unidades</h3>
+        <table class="leaderboard">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Unidad</th>
+              <th>Tipo</th>
+              <th>Score</th>
+              <th>Sweet Spot</th>
+              <th>Ralenti</th>
+              <th>Tiempo motor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ranked.map(function(r, idx) { return renderLeaderboardRow(r, idx + 1); }).join("")}
+            ${skipped.concat(noActivity).map(function(r) { return renderSkippedRow(r); }).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderDonut(dist, total, fleetGrade) {
+      const radius = 70;
+      const circumference = 2 * Math.PI * radius;
+      const colors = { A: "#10b981", B: "#3b82f6", C: "#f59e0b", D: "#ea580c", F: "#ef4444" };
+      let offset = 0;
+      const segments = ["A", "B", "C", "D", "F"].map(function(g) {
+        const value = dist[g];
+        if (value === 0) return "";
+        const dashLength = (value / total) * circumference;
+        const dashGap = circumference - dashLength;
+        const seg = `
+          <circle cx="100" cy="100" r="${radius}" fill="none" stroke="${colors[g]}" stroke-width="22"
+                  stroke-dasharray="${dashLength} ${dashGap}"
+                  stroke-dashoffset="${-offset}"></circle>
+        `;
+        offset += dashLength;
+        return seg;
+      }).join("");
+
+      return `
+        <div class="donut-wrap">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="22"></circle>
+            ${segments}
+          </svg>
+          <div class="donut-text">
+            <div class="big">${total}</div>
+            <div class="small">Unidades evaluadas</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLeaderboardRow(r, rank) {
+      const drivingSec = r.result.sweetSec + r.result.belowSec + r.result.aboveSec;
+      const pctSweet = drivingSec > 0 ? (r.result.sweetSec / drivingSec) * 100 : 0;
+      const pctIdle = r.result.totalEngineSec > 0 ? (r.result.idleSec / r.result.totalEngineSec) * 100 : 0;
+      const colors = { A: "#10b981", B: "#3b82f6", C: "#f59e0b", D: "#ea580c", F: "#ef4444" };
+      const color = colors[r.grade.letter];
+
+      const rankClass = rank === 1 ? "top1" : rank === 2 ? "top2" : rank === 3 ? "top3" : "";
+      const vehicleLabel = r.vehicleType || "Default";
+
+      return `
+        <tr>
+          <td><span class="rank ${rankClass}">#${rank}</span></td>
+          <td><strong>${escapeHtml(r.unitName)}</strong></td>
+          <td><span class="unit-type-label">${escapeHtml(vehicleLabel)}</span></td>
+          <td>
+            <span class="score-cell" style="color:${color};">${r.score.toFixed(1)}</span>
+            <span class="grade-pill ${r.grade.cssClass}">${r.grade.letter}</span>
+            <br>
+            <span class="mini-bar"><span class="fill" style="width:${r.score}%;background:${color};"></span></span>
+          </td>
+          <td>${pctSweet.toFixed(1)}%</td>
+          <td>${pctIdle.toFixed(1)}%</td>
+          <td>${formatHMS(r.result.totalEngineSec)}</td>
+        </tr>
+      `;
+    }
+
+    function renderSkippedRow(r) {
+      return `
+        <tr>
+          <td>—</td>
+          <td>${escapeHtml(r.unitName)}</td>
+          <td colspan="5"><span class="skip">${escapeHtml(r.skipReason || "Sin actividad")}</span></td>
+        </tr>
+      `;
+    }
+
+    function renderFleetObservations(evaluated, dist, avgScore, ranked, skipped, noActivity) {
+      const obs = [];
+      const total = evaluated.length;
+
+      // Resumen general
+      const fleetGrade = gradeFromScore(avgScore);
+      const obsType = avgScore >= 70 ? "ok" : avgScore >= 55 ? "alert" : "bad";
+      obs.push({ type: obsType, text: `<strong>Score promedio de flota: ${avgScore.toFixed(1)} (${fleetGrade.label}).</strong>` });
+
+      // Unidades criticas
+      const critical = dist.F + dist.D;
+      if (critical > 0) {
+        obs.push({ type: "bad", text: `<strong>${critical} unidad(es) requieren atencion urgente</strong> (grado D o F). Capacitacion prioritaria recomendada para sus conductores.` });
+      }
+
+      // Top performer
+      if (ranked.length > 0 && ranked[0].score >= 70) {
+        obs.push({ type: "ok", text: `<strong>Mejor desempeno: ${escapeHtml(ranked[0].unitName)}</strong> con score ${ranked[0].score.toFixed(1)}. Considerar reconocerlo o usar como referencia para el resto.` });
+      }
+
+      // Peor performer
+      if (ranked.length > 1 && ranked[ranked.length - 1].score < 55) {
+        const worst = ranked[ranked.length - 1];
+        obs.push({ type: "alert", text: `<strong>Necesita mas atencion: ${escapeHtml(worst.unitName)}</strong> con score ${worst.score.toFixed(1)} (${worst.grade.label}).` });
+      }
+
+      // Cobertura
+      if (skipped.length > 0) {
+        obs.push({ type: "action", text: `<strong>${skipped.length} unidad(es) sin sensor de RPM.</strong> Configurar el sensor "Engine revolution sensor" en Wialon para incluirlas en futuros analisis.` });
+      }
+
+      // Sin actividad
+      if (noActivity.length > 0) {
+        obs.push({ type: "info", text: `<strong>${noActivity.length} unidad(es) sin actividad</strong> en el periodo. Vehiculos no operaron o no transmitieron datos.` });
+      }
+
+      // Diagnostico de patron de flota
+      if (evaluated.length >= 3) {
+        let totalLugging = 0, totalOverrev = 0;
+        evaluated.forEach(function(r) {
+          const ds = r.result.sweetSec + r.result.belowSec + r.result.aboveSec;
+          if (ds > 0) {
+            totalLugging += (r.result.belowSec / ds) * 100;
+            totalOverrev += (r.result.aboveSec / ds) * 100;
+          }
+        });
+        const avgLugging = totalLugging / evaluated.length;
+        const avgOverrev = totalOverrev / evaluated.length;
+
+        if (avgLugging > avgOverrev * 1.5 && avgLugging > 15) {
+          obs.push({ type: "info", text: `<strong>Patron de flota: lugging predominante</strong> (promedio ${avgLugging.toFixed(1)}% del tiempo conduciendo). Enfocar capacitacion en cambio de velocidades.` });
+        } else if (avgOverrev > avgLugging * 1.5 && avgOverrev > 15) {
+          obs.push({ type: "info", text: `<strong>Patron de flota: sobre-revolucion predominante</strong> (promedio ${avgOverrev.toFixed(1)}% del tiempo conduciendo). Enfocar capacitacion en aceleracion gradual.` });
+        }
+      }
+
+      return renderObservations(obs);
+    }
+
+    function renderNoSensorResult(unit) {
+      const emptyState = document.getElementById("empty-state");
+      if (emptyState) emptyState.classList.add("hidden");
+      const actions = document.getElementById("analysis-actions");
+      if (actions) actions.classList.add("hidden");
+      els.resultsCard.classList.remove("hidden");
+      els.resultsContent.innerHTML = `
+        <div class="alert alert-warn">
+          La unidad <strong>${escapeHtml(unit.getName())}</strong> no tiene sensor de RPM configurado en Wialon.
+          No se puede calcular el Sweet Spot.
+        </div>
+        <p class="hint">Configura un sensor de tipo "Engine revolution sensor" en las propiedades de la unidad en Wialon y vuelve a intentar.</p>
+      `;
+    }
+
+    function renderResult(unit, sensor, vehicleType, range, r, fromUnix, toUnix) {
+      // Tiempo de conduccion = todo menos el ralenti
+      const drivingSec = r.sweetSec + r.belowSec + r.aboveSec;
+
+      // % real (sobre tiempo de conduccion, mas justo para evaluar al conductor)
+      const pct = drivingSec > 0 ? (r.sweetSec / drivingSec) * 100 : 0;
+      const pctBelow = drivingSec > 0 ? (r.belowSec / drivingSec) * 100 : 0;
+      const pctAbove = drivingSec > 0 ? (r.aboveSec / drivingSec) * 100 : 0;
+
+      // % de ralenti sobre tiempo total motor encendido
+      const pctIdleTotal = r.totalEngineSec > 0 ? (r.idleSec / r.totalEngineSec) * 100 : 0;
+
+      // Score compuesto y grado
+      const score = computeScore(r);
+      const grade = gradeFromScore(score);
+
+      // Clase visual para el gauge segun score
+      let perfClass = "good";
+      if (score < 55) perfClass = "bad";
+      else if (score < 70) perfClass = "warn";
+
+      const vehicleLabel = vehicleType
+        ? escapeHtml(vehicleType)
+        : 'Sin tipo en Profile · usando Default';
+
+      const fromDate = new Date(fromUnix * 1000);
+      const toDate = new Date(toUnix * 1000);
+
+      // Gauge circular (SVG)
+      const radius = 70;
+      const circumference = 2 * Math.PI * radius;
+      const dashOffset = circumference * (1 - score / 100);
+
+      const html = `
+        <div class="result-hero ${perfClass}">
+          <div class="gauge ${perfClass}">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle class="bg-arc" cx="80" cy="80" r="${radius}"></circle>
+              <circle class="fill-arc" cx="80" cy="80" r="${radius}"
+                stroke-dasharray="${circumference}"
+                stroke-dashoffset="${dashOffset}"></circle>
+            </svg>
+            <div class="gauge-text">
+              <div class="pct">${score.toFixed(0)}</div>
+              <div class="label">Score</div>
+            </div>
+          </div>
+
+          <div class="hero-summary">
+            <div class="unit-name">${escapeHtml(unit.getName())}</div>
+            <div class="meta">
+              ${escapeHtml(vehicleLabel)} · Rango: <strong>${range.min} - ${range.max} RPM</strong>
+            </div>
+            <div class="score-display">
+              <span class="score-num ${grade.cssClass}">${score.toFixed(1)}</span>
+              <span class="score-unit">/ 100</span>
+              <span class="grade-badge ${grade.cssClass}">
+                <span class="letter">${grade.letter}</span>
+                ${grade.label}
+              </span>
+            </div>
+            <div class="stat-row" style="margin-top: 12px;">
+              <div class="stat">
+                <div class="stat-label">En Sweet Spot</div>
+                <div class="stat-value">${pct.toFixed(1)}%</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Conduciendo</div>
+                <div class="stat-value">${formatHMS(drivingSec)}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Ralenti</div>
+                <div class="stat-value">${formatHMS(r.idleSec)} <span class="inline-muted">(${pctIdleTotal.toFixed(0)}%)</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Periodo</div>
+                <div class="stat-value">${formatPeriod(fromDate, toDate)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack-legend">
+          <div class="item"><span class="dot" style="background:#f59e0b;"></span> Por debajo manejando (&lt; ${range.min})</div>
+          <div class="item"><span class="dot" style="background:#10b981;"></span> Sweet Spot (${range.min}-${range.max})</div>
+          <div class="item"><span class="dot" style="background:#ef4444;"></span> Por encima (&gt; ${range.max})</div>
+        </div>
+
+        <p class="hint" style="margin: 0 0 4px 0; font-size: 12px;">Distribucion del tiempo conduciendo (el ralenti se excluye de esta evaluacion):</p>
+
+        <div class="stack-bar">
+          ${pctBelow > 0 ? `<div class="seg below" style="width:${pctBelow}%">${pctBelow >= 8 ? pctBelow.toFixed(1) + '%' : ''}</div>` : ''}
+          ${pct > 0 ? `<div class="seg sweet" style="width:${pct}%">${pct >= 8 ? pct.toFixed(1) + '%' : ''}</div>` : ''}
+          ${pctAbove > 0 ? `<div class="seg above" style="width:${pctAbove}%">${pctAbove >= 8 ? pctAbove.toFixed(1) + '%' : ''}</div>` : ''}
+          ${drivingSec === 0 ? `<div class="seg" style="width:100%;background:#cbd5e1;color:#475569;">Sin tiempo de conduccion</div>` : ''}
+        </div>
+
+        <div class="breakdown-grid">
+          <div class="breakdown-card idle">
+            <div class="bc-title">Ralenti</div>
+            <div class="bc-range">Motor ON, velocidad &lt; 3 km/h</div>
+            <div class="bc-time">${formatHMS(r.idleSec)}</div>
+            <div class="bc-pct">${pctIdleTotal.toFixed(1)}% del motor encendido</div>
+          </div>
+          <div class="breakdown-card below">
+            <div class="bc-title">Por debajo</div>
+            <div class="bc-range">RPM &lt; ${range.min} manejando</div>
+            <div class="bc-time">${formatHMS(r.belowSec)}</div>
+            <div class="bc-pct">${pctBelow.toFixed(1)}% conduciendo</div>
+          </div>
+          <div class="breakdown-card sweet">
+            <div class="bc-title">En Sweet Spot</div>
+            <div class="bc-range">${range.min} - ${range.max} RPM</div>
+            <div class="bc-time">${formatHMS(r.sweetSec)}</div>
+            <div class="bc-pct">${pct.toFixed(1)}% conduciendo</div>
+          </div>
+          <div class="breakdown-card above">
+            <div class="bc-title">Por encima</div>
+            <div class="bc-range">RPM &gt; ${range.max}</div>
+            <div class="bc-time">${formatHMS(r.aboveSec)}</div>
+            <div class="bc-pct">${pctAbove.toFixed(1)}% conduciendo</div>
+          </div>
+        </div>
+
+        ${renderObservations(generateObservations(r, score, grade, vehicleType))}
+
+        ${renderDailySection(r.daily, range, fromUnix, toUnix)}
+
+        <div class="footer-info">
+          <span><strong>Sensor:</strong> ${escapeHtml(sensor.n)} (<code>${escapeHtml(sensor.p)}</code>)</span>
+          <span><strong>Mensajes:</strong> ${r.totalMessages.toLocaleString()}</span>
+          <span><strong>Evaluados:</strong> ${r.evaluatedMessages.toLocaleString()}</span>
+          ${r.invalidMessages > 0 ? `<span><strong>Invalidos:</strong> ${r.invalidMessages.toLocaleString()}</span>` : ''}
+        </div>
+      `;
+
+      els.resultsContent.innerHTML = html;
+
+      // Mostrar barra de acciones (imprimir) y rellenar header de impresion
+      const actions = document.getElementById("analysis-actions");
+      if (actions) actions.classList.remove("hidden");
+
+      const printHeader = document.getElementById("print-header-analisis");
+      if (printHeader) {
+        printHeader.innerHTML = `
+          <h1 class="ph-title">Reporte Sweet Spot - ${escapeHtml(unit.getName())}</h1>
+          <div class="ph-meta">
+            <strong>Periodo:</strong> ${escapeHtml(fromDate.toLocaleString())} - ${escapeHtml(toDate.toLocaleString())} ·
+            <strong>Tipo:</strong> ${escapeHtml(vehicleLabel)} ·
+            <strong>Rango RPM:</strong> ${range.min} - ${range.max} ·
+            <strong>Score:</strong> ${score.toFixed(1)} (${grade.label})
+            <br>
+            <strong>Generado:</strong> ${escapeHtml(new Date().toLocaleString())} ·
+            <strong>Sensor:</strong> ${escapeHtml(sensor.n)} (${escapeHtml(sensor.p)})
+          </div>
+        `;
+      }
+    }
+
+    // Genera observaciones automaticas basadas en las metricas
+    function generateObservations(r, score, grade, vehicleType) {
+      const obs = [];
+
+      const drivingSec = r.sweetSec + r.belowSec + r.aboveSec;
+      const pctSweet = drivingSec > 0 ? (r.sweetSec / drivingSec) * 100 : 0;
+      const pctBelow = drivingSec > 0 ? (r.belowSec / drivingSec) * 100 : 0;
+      const pctAbove = drivingSec > 0 ? (r.aboveSec / drivingSec) * 100 : 0;
+      const pctIdleTotal = r.totalEngineSec > 0 ? (r.idleSec / r.totalEngineSec) * 100 : 0;
+
+      // 1. Diagnostico principal segun score
+      if (score >= 85) {
+        obs.push({ type: "ok", text: `<strong>Conduccion ejemplar.</strong> Score ${score.toFixed(1)} (${grade.label}). Mantener y reconocer al conductor.` });
+      } else if (score >= 70) {
+        obs.push({ type: "ok", text: `<strong>Buen desempeno.</strong> Score ${score.toFixed(1)} (${grade.label}). Refuerzos puntuales para llegar a excelencia.` });
+      } else if (score >= 55) {
+        obs.push({ type: "alert", text: `<strong>Desempeno aceptable pero mejorable.</strong> Score ${score.toFixed(1)} (${grade.label}). Recomendado: plan de mejora.` });
+      } else if (score >= 40) {
+        obs.push({ type: "bad", text: `<strong>Desempeno deficiente.</strong> Score ${score.toFixed(1)} (${grade.label}). Capacitacion requerida sobre tecnica de manejo.` });
+      } else {
+        obs.push({ type: "bad", text: `<strong>Desempeno critico.</strong> Score ${score.toFixed(1)} (${grade.label}). Capacitacion urgente recomendada.` });
+      }
+
+      // 2. Diagnostico del problema principal (lugging vs sobre-revolucion)
+      if (pctBelow > 5 || pctAbove > 5) {
+        if (pctBelow > pctAbove * 2) {
+          obs.push({ type: "info", text: `<strong>Patron de lugging:</strong> ${pctBelow.toFixed(1)}% del tiempo conduciendo con RPM bajo. El conductor maneja con cambios muy altos; debe bajar cambios cuando el RPM cae.` });
+        } else if (pctAbove > pctBelow * 2) {
+          obs.push({ type: "info", text: `<strong>Patron de sobre-revolucion:</strong> ${pctAbove.toFixed(1)}% del tiempo conduciendo con RPM alto. El conductor acelera demasiado o no cambia a tiempo.` });
+        } else if (pctBelow + pctAbove > 30) {
+          obs.push({ type: "info", text: `<strong>Manejo desbalanceado:</strong> ${pctBelow.toFixed(1)}% lugging y ${pctAbove.toFixed(1)}% sobre-revolucionando. Problema general de gestion del motor.` });
+        }
+      }
+
+      // 3. Alerta de ralenti excesivo
+      if (pctIdleTotal > 25) {
+        obs.push({ type: "alert", text: `<strong>Tiempo en ralenti muy alto:</strong> ${pctIdleTotal.toFixed(1)}% del motor encendido fue parado (${formatHMS(r.idleSec)}). Revisar paradas largas con motor encendido sin necesidad.` });
+      } else if (pctIdleTotal > 15) {
+        obs.push({ type: "info", text: `<strong>Ralenti elevado:</strong> ${pctIdleTotal.toFixed(1)}% del tiempo en ralenti (${formatHMS(r.idleSec)}). Considerar reducir esperas con motor encendido.` });
+      }
+
+      // 4. Consistencia entre dias
+      const dailyKeys = Object.keys(r.daily || {});
+      if (dailyKeys.length >= 2) {
+        const dailyScores = dailyKeys.map(function(k) {
+          const d = r.daily[k];
+          const dSec = d.sweetSec + d.belowSec + d.aboveSec;
+          if (dSec === 0) return null;
+          return (d.sweetSec / dSec) * 100;
+        }).filter(function(v) { return v !== null; });
+
+        if (dailyScores.length >= 2) {
+          const max = Math.max.apply(null, dailyScores);
+          const min = Math.min.apply(null, dailyScores);
+          const range = max - min;
+
+          if (range < 8) {
+            obs.push({ type: "info", text: `<strong>Patron consistente:</strong> los dias varian solo ${range.toFixed(1)} puntos. Es comportamiento habitual del conductor, no un dia aislado.` });
+          } else if (range > 25) {
+            obs.push({ type: "info", text: `<strong>Comportamiento inconsistente:</strong> los dias varian ${range.toFixed(1)} puntos (entre ${min.toFixed(1)}% y ${max.toFixed(1)}%). Depende de ruta o condiciones.` });
+          }
+        }
+      }
+
+      // 5. Configuracion faltante
+      if (!vehicleType) {
+        obs.push({ type: "action", text: `<strong>Configurar tipo de vehiculo en Wialon.</strong> Esta unidad no tiene "Vehicle type" en su Profile, por eso se uso el rango "Default" (1200-2000). Configurarlo permite evaluacion mas precisa.` });
+      }
+
+      // 6. Cobertura de mensajes invalidos
+      if (r.invalidMessages > 0 && r.totalMessages > 0) {
+        const pctInvalid = (r.invalidMessages / r.totalMessages) * 100;
+        if (pctInvalid > 10) {
+          obs.push({ type: "alert", text: `<strong>Datos parciales:</strong> ${pctInvalid.toFixed(0)}% de los mensajes no tenian dato valido de RPM. Revisar configuracion del sensor en Wialon.` });
+        }
+      }
+
+      return obs;
+    }
+
+    function renderObservations(observations) {
+      if (!observations || observations.length === 0) return "";
+      const iconForType = { ok: "OK", info: "i", alert: "!", bad: "X", action: ">" };
+      const itemsHtml = observations.map(function(o) {
+        return `
+          <div class="obs-item ${o.type}">
+            <span class="obs-icon">${iconForType[o.type] || "i"}</span>
+            <div>${o.text}</div>
+          </div>
+        `;
+      }).join("");
+      return `
+        <div class="observations-section">
+          <h3>Observaciones</h3>
+          <div class="obs-list">${itemsHtml}</div>
+        </div>
+      `;
+    }
+
+    function renderDailySection(daily, range, fromUnix, toUnix) {
+      // Generar lista de dias entre fromUnix y toUnix (en hora local)
+      const days = [];
+      const start = new Date(fromUnix * 1000);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(toUnix * 1000);
+      end.setHours(0, 0, 0, 0);
+
+      const pad = (n) => String(n).padStart(2, "0");
+      const dowNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+
+      let cursor = new Date(start);
+      while (cursor <= end) {
+        const key = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(cursor.getDate())}`;
+        days.push({
+          key: key,
+          date: new Date(cursor),
+          dow: dowNames[cursor.getDay()],
+          label: `${pad(cursor.getDate())}/${pad(cursor.getMonth() + 1)}`,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      // Si solo es un dia, no mostramos la seccion
+      if (days.length < 2) return "";
+
+      const rows = days.map(function(d) {
+        const data = daily[d.key];
+        if (!data || data.totalEngineSec === 0) {
+          return `
+            <div class="day-row">
+              <div class="day-label">
+                <span class="dow">${d.dow}</span>
+                ${d.label}
+              </div>
+              <div class="day-bar"></div>
+              <div class="day-pct none">Sin actividad</div>
+              <div class="day-time">—</div>
+            </div>
+          `;
+        }
+
+        // % sobre tiempo total motor encendido (para mostrar la barra completa)
+        const pctIdle = (data.idleSec / data.totalEngineSec) * 100;
+        const pctBelowBar = (data.belowSec / data.totalEngineSec) * 100;
+        const pctSweetBar = (data.sweetSec / data.totalEngineSec) * 100;
+        const pctAboveBar = (data.aboveSec / data.totalEngineSec) * 100;
+
+        // % real (sobre tiempo de conduccion) - es el numero que muestra a la derecha
+        const drivingSec = data.sweetSec + data.belowSec + data.aboveSec;
+        const pctReal = drivingSec > 0 ? (data.sweetSec / drivingSec) * 100 : 0;
+
+        let pctClass = "good";
+        if (drivingSec === 0) pctClass = "none";
+        else if (pctReal < 50) pctClass = "bad";
+        else if (pctReal < 70) pctClass = "warn";
+
+        const pctDisplay = drivingSec === 0 ? "Solo ralenti" : `${pctReal.toFixed(1)}%`;
+
+        return `
+          <div class="day-row">
+            <div class="day-label">
+              <span class="dow">${d.dow}</span>
+              ${d.label}
+            </div>
+            <div class="day-bar">
+              ${pctIdle > 0 ? `<div class="seg idle" style="width:${pctIdle}%"></div>` : ''}
+              ${pctBelowBar > 0 ? `<div class="seg below" style="width:${pctBelowBar}%"></div>` : ''}
+              ${pctSweetBar > 0 ? `<div class="seg sweet" style="width:${pctSweetBar}%"></div>` : ''}
+              ${pctAboveBar > 0 ? `<div class="seg above" style="width:${pctAboveBar}%"></div>` : ''}
+            </div>
+            <div class="day-pct ${pctClass}">${pctDisplay}</div>
+            <div class="day-time">${formatHMS(data.totalEngineSec)}</div>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="daily-section">
+          <h3>Desglose por dia</h3>
+          <p class="hint">
+            % real de Sweet Spot por dia (sobre tiempo conduciendo, excluye ralenti).
+            Barra: <span style="display:inline-block;width:10px;height:10px;background:#cbd5e1;border-radius:2px;vertical-align:middle;"></span> ralenti ·
+            <span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;vertical-align:middle;"></span> debajo ·
+            <span style="display:inline-block;width:10px;height:10px;background:#10b981;border-radius:2px;vertical-align:middle;"></span> sweet ·
+            <span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;vertical-align:middle;"></span> encima
+          </p>
+          ${rows}
+        </div>
+      `;
+    }
+
+    function formatPeriod(from, to) {
+      const sameDay = from.toDateString() === to.toDateString();
+      if (sameDay) {
+        return from.toLocaleDateString();
+      }
+      const days = Math.round((to - from) / (24 * 3600 * 1000));
+      return `${days} dia${days !== 1 ? 's' : ''}`;
+    }
+
+    // ----------------------------------------------------------------
+    // Event listeners
+    // ----------------------------------------------------------------
+
+    // Navegacion del sidebar
+    function switchSection(sectionName) {
+      document.querySelectorAll(".sidebar .nav-item[data-section]").forEach(function(el) {
+        const isActive = el.dataset.section === sectionName;
+        el.classList.toggle("active", isActive);
+        if (isActive) {
+          el.setAttribute("aria-current", "page");
+        } else {
+          el.removeAttribute("aria-current");
+        }
+      });
+      document.querySelectorAll(".main-content .section").forEach(function(el) {
+        el.classList.toggle("active", el.dataset.section === sectionName);
+      });
+
+      // Mostrar el panel de controles correcto segun la seccion
+      const controlsPanel = document.getElementById("controls-panel");
+      const fleetControlsPanel = document.getElementById("fleet-controls-panel");
+      if (controlsPanel) controlsPanel.classList.toggle("hidden", sectionName !== "analisis");
+      if (fleetControlsPanel) fleetControlsPanel.classList.toggle("hidden", sectionName !== "flota");
+    }
+
+    document.querySelectorAll(".sidebar .nav-item[data-section]").forEach(function(item) {
+      item.addEventListener("click", function() {
+        switchSection(item.dataset.section);
+      });
+      item.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          switchSection(item.dataset.section);
+        }
+      });
+    });
+
+    els.btnConnect.addEventListener("click", connect);
+    els.btnDisconnect.addEventListener("click", disconnect);
+    els.btnDisconnect.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        disconnect();
+      }
+    });
+    els.tokenInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") connect();
+    });
+
+    els.btnExecute.addEventListener("click", executeAnalysis);
+    els.btnExecuteFleet.addEventListener("click", executeFleetAnalysis);
+
+    const btnPrintAnalysis = document.getElementById("btn-print-analysis");
+    if (btnPrintAnalysis) {
+      btnPrintAnalysis.addEventListener("click", function() {
+        window.print();
+      });
+    }
+
+    const btnThemeToggle = document.getElementById("btn-theme-toggle");
+    if (btnThemeToggle) {
+      btnThemeToggle.addEventListener("click", toggleTheme);
+    }
+
+    els.btnResetRanges.addEventListener("click", function() {
+      if (confirm("Restaurar todos los rangos a sus valores por defecto?")) {
+        state.ranges = { ...DEFAULT_RANGES };
+        saveRanges();
+        renderRanges();
+      }
+    });
+
+    // === Auto-conectar si hay SID en la URL (modo Wialon App) ===
+    autoConnectFromUrl();
+  </script>
+
+</body>
+</html>
