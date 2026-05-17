@@ -2422,26 +2422,12 @@
         showMainScreen(user);
       }
 
-      // Estrategia: probar metodos en cascada hasta que uno funcione
+      // Estrategia: probar metodos en cascada hasta que uno funcione.
+      // ORDEN OPTIMIZADO: duplicate(sid) es lo que funciona para Wialon Apps,
+      // los demas quedan como fallback por compatibilidad con otras configuraciones.
       const attempts = [];
 
-      // 1. Si hay auth_hash/access_token (de "Authorize hash" en Wialon Apps), usar con loginToken
-      if (URL_AUTH_HASH) {
-        attempts.push({
-          name: "loginToken(authHash)",
-          run: function(cb) { session.loginToken(URL_AUTH_HASH, "", cb); }
-        });
-      }
-
-      // 2. Si hay SID y el SDK tiene loginAuthHash, intentar atar la sesion existente
-      if (URL_SID && typeof session.loginAuthHash === "function") {
-        attempts.push({
-          name: "loginAuthHash(sid)",
-          run: function(cb) { session.loginAuthHash(URL_SID, cb); }
-        });
-      }
-
-      // 3. Si hay SID y el SDK tiene duplicate, crear sesion duplicada
+      // 1. duplicate(sid) - METODO PRINCIPAL para Wialon Apps con "Active SID"
       if (URL_SID && typeof session.duplicate === "function") {
         attempts.push({
           name: "duplicate(sid)",
@@ -2449,7 +2435,23 @@
         });
       }
 
-      // 4. Ultimo recurso: SID como token
+      // 2. loginToken con authHash - si Wialon paso un token de auth (de "Authorize hash")
+      if (URL_AUTH_HASH) {
+        attempts.push({
+          name: "loginToken(authHash)",
+          run: function(cb) { session.loginToken(URL_AUTH_HASH, "", cb); }
+        });
+      }
+
+      // 3. loginAuthHash - para SDKs/configuraciones que lo soporten
+      if (URL_SID && typeof session.loginAuthHash === "function") {
+        attempts.push({
+          name: "loginAuthHash(sid)",
+          run: function(cb) { session.loginAuthHash(URL_SID, cb); }
+        });
+      }
+
+      // 4. loginToken(sid) como ultimo recurso
       if (URL_SID) {
         attempts.push({
           name: "loginToken(sid)",
