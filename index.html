@@ -2091,10 +2091,28 @@
       } catch (e) { return null; }
     }
 
-    const URL_SID = getUrlParam("sid") || getUrlParam("access_token");
-    const URL_HOST = getUrlParam("hosturl") || getUrlParam("baseUrl");
+    // Buscar token de auth (preferido para loginToken) y SID (sesion activa)
+    const URL_AUTH_HASH = getUrlParam("access_token") || getUrlParam("authHash") ||
+                          getUrlParam("auth_hash") || getUrlParam("token");
+    const URL_SID = getUrlParam("sid") || getUrlParam("session_id");
+    const URL_HOST = getUrlParam("hosturl") || getUrlParam("baseUrl") ||
+                     getUrlParam("host_url") || getUrlParam("hostUrl");
     const WIALON_HOST = URL_HOST ? URL_HOST.replace(/\/$/, "") : DEFAULT_WIALON_HOST;
-    const HAS_WIALON_SESSION = !!URL_SID;
+    const HAS_WIALON_SESSION = !!(URL_AUTH_HASH || URL_SID);
+
+    // Debug: imprimir TODOS los params que Wialon nos pasa para entender el formato
+    (function logAllUrlParams() {
+      try {
+        const all = {};
+        new URLSearchParams(window.location.search).forEach(function(v, k) {
+          // Truncar valores largos para no exponer datos sensibles
+          all[k] = (v && v.length > 12) ? v.substring(0, 8) + "..." + " (len " + v.length + ")" : v;
+        });
+        if (Object.keys(all).length > 0) {
+          console.log("[AutoConnect] URL params recibidos:", all);
+        }
+      } catch (e) {}
+    })();
 
     // === Tema: aplicar antes que cualquier render ===
     (function initTheme() {
@@ -2360,15 +2378,15 @@
       });
     }
 
-    // Auto-conexion cuando la app es abierta desde Wialon (con ?sid= en URL)
+    // Auto-conexion cuando la app es abierta desde Wialon
     function autoConnectFromUrl() {
       if (!HAS_WIALON_SESSION) return;
 
-      console.log("[AutoConnect] SID detectado en URL");
+      console.log("[AutoConnect] Iniciando auto-conexion");
       console.log("[AutoConnect] Host:", WIALON_HOST);
-      console.log("[AutoConnect] SID length:", URL_SID ? URL_SID.length : 0);
+      console.log("[AutoConnect] Auth hash disponible:", !!URL_AUTH_HASH, URL_AUTH_HASH ? "len " + URL_AUTH_HASH.length : "");
+      console.log("[AutoConnect] SID disponible:", !!URL_SID, URL_SID ? "len " + URL_SID.length : "");
 
-      // Mostrar pantalla de conexion con mensaje de auto-conectando
       els.tokenInput.value = "";
       els.tokenInput.disabled = true;
       els.btnConnect.disabled = true;
@@ -2379,17 +2397,17 @@
       const session = wialon.core.Session.getInstance();
       session.initSession(WIALON_HOST);
 
-      function finalize(code) {
+      function finalize(code, methodTried) {
         els.tokenInput.disabled = false;
         els.btnConnect.disabled = false;
         els.btnConnect.textContent = "Conectar";
 
-        console.log("[AutoConnect] Resultado final:", code);
+        console.log("[AutoConnect] Resultado final:", code, "metodo:", methodTried);
 
         if (code) {
           const errMsg = wialon.core.Errors.getErrorText(code);
           showAlert(els.connectAlert, "error",
-            `Auto-conexion fallo: ${errMsg} (codigo ${code}). Puedes intentar con un token manual.`);
+            `Auto-conexion fallo (${methodTried}): ${errMsg} (codigo ${code}). Puedes intentar con un token manual.`);
           return;
         }
 
@@ -2404,24 +2422,61 @@
         showMainScreen(user);
       }
 
-      // Para SIDs de Wialon Apps, el metodo correcto es loginAuthHash (NO loginToken).
-      // loginToken espera un token permanente generado con createAuthHash.
-      // loginAuthHash "ata" la sesion del SID que el usuario ya tiene activo en Wialon.
-      // Hacemos cascada: primero loginAuthHash, si falla por method-not-found cae a loginToken.
-      if (typeof session.loginAuthHash === "function") {
-        console.log("[AutoConnect] Intentando loginAuthHash");
-        session.loginAuthHash(URL_SID, function(code) {
-          if (code) {
-            console.log("[AutoConnect] loginAuthHash fallo (" + code + "), intentando loginToken");
-            session.loginToken(URL_SID, "", finalize);
+      // Estrategia: probar metodos en cascada hasta que uno funcione
+      const attempts = [];
+
+      // 1. Si hay auth_hash/access_token (de "Authorize hash" en Wialon Apps), usar con loginToken
+      if (URL_AUTH_HASH) {
+        attempts.push({
+          name: "loginToken(authHash)",
+          run: function(cb) { session.loginToken(URL_AUTH_HASH, "", cb); }
+        });
+      }
+
+      // 2. Si hay SID y el SDK tiene loginAuthHash, intentar atar la sesion existente
+      if (URL_SID && typeof session.loginAuthHash === "function") {
+        attempts.push({
+          name: "loginAuthHash(sid)",
+          run: function(cb) { session.loginAuthHash(URL_SID, cb); }
+        });
+      }
+
+      // 3. Si hay SID y el SDK tiene duplicate, crear sesion duplicada
+      if (URL_SID && typeof session.duplicate === "function") {
+        attempts.push({
+          name: "duplicate(sid)",
+          run: function(cb) { session.duplicate(URL_SID, "", true, cb); }
+        });
+      }
+
+      // 4. Ultimo recurso: SID como token
+      if (URL_SID) {
+        attempts.push({
+          name: "loginToken(sid)",
+          run: function(cb) { session.loginToken(URL_SID, "", cb); }
+        });
+      }
+
+      console.log("[AutoConnect] Estrategias a probar:", attempts.map(function(a) { return a.name; }));
+
+      function tryNext(idx, lastCode, lastMethod) {
+        if (idx >= attempts.length) {
+          finalize(lastCode || 1, lastMethod || "ninguno");
+          return;
+        }
+        const att = attempts[idx];
+        console.log("[AutoConnect] Probando:", att.name);
+        att.run(function(code) {
+          console.log("[AutoConnect] " + att.name + " -> code " + code);
+          if (code === 0) {
+            finalize(0, att.name);
           } else {
-            finalize(0);
+            tryNext(idx + 1, code, att.name);
           }
         });
-      } else {
-        console.log("[AutoConnect] loginAuthHash no disponible, usando loginToken");
-        session.loginToken(URL_SID, "", finalize);
       }
+
+      tryNext(0);
     }
 
     function showMainScreen(user) {
