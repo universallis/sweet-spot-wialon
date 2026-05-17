@@ -4,8 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sweet Spot Monitor - Wialon</title>
-  <link rel="icon" type="image/png" href="logo.png" />
+
+  <!-- Iconos: multiples formas para que Wialon (y cualquier sistema) encuentre el icono -->
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="logo.png" />
+  <link rel="icon" type="image/png" sizes="128x128" href="logo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="logo.png" />
+  <link rel="icon" type="image/png" sizes="any" href="logo.png" />
+  <link rel="shortcut icon" type="image/png" href="logo.png" />
   <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png" />
+
+  <!-- Meta tags para Open Graph y Wialon (algunos sistemas las usan) -->
+  <meta property="og:image" content="https://universallis.github.io/sweet-spot-wialon/logo.png" />
+  <meta property="og:title" content="Sweet Spot Monitor" />
+  <meta property="og:description" content="Evaluacion de habitos de conduccion via RPM" />
+  <meta name="theme-color" content="#0f766e" />
+
   <script src="https://hst-api.wialon.com/wsdk/script/wialon.js"></script>
   <style>
     :root {
