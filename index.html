@@ -652,8 +652,8 @@
     /* === RESULTADOS: hero === */
     .result-hero {
       display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 36px;
+      grid-template-columns: auto minmax(0, 1fr) minmax(280px, 360px);
+      gap: 28px;
       align-items: center;
       padding: 28px 32px;
       background: var(--hero-bg);
@@ -718,15 +718,52 @@
     }
 
     .gauge-text .pct {
-      font-size: 44px;
-      font-weight: 800;
+      font-size: 52px;
+      font-weight: 900;
       line-height: 1;
-      letter-spacing: 0;
+      letter-spacing: -2px;
+      /* Efecto relieve: combinacion de sombras claras arriba y oscuras abajo */
+      text-shadow:
+        1px 1px 0 rgba(255, 255, 255, 0.95),
+        -1px -1px 0 rgba(0, 0, 0, 0.08),
+        2px 3px 4px rgba(0, 0, 0, 0.18),
+        0 8px 16px rgba(0, 0, 0, 0.12);
+      transform: translateZ(0); /* fuerza GPU para que el render sea nitido */
     }
 
-    .gauge.good .pct { color: #047857; }
-    .gauge.warn .pct { color: #b45309; }
-    .gauge.bad .pct { color: #b91c1c; }
+    .gauge.good .pct {
+      color: #047857;
+      text-shadow:
+        1px 1px 0 rgba(255, 255, 255, 0.95),
+        -1px -1px 0 rgba(0, 0, 0, 0.08),
+        2px 3px 4px rgba(4, 120, 87, 0.25),
+        0 8px 16px rgba(4, 120, 87, 0.15);
+    }
+    .gauge.warn .pct {
+      color: #b45309;
+      text-shadow:
+        1px 1px 0 rgba(255, 255, 255, 0.95),
+        -1px -1px 0 rgba(0, 0, 0, 0.08),
+        2px 3px 4px rgba(180, 83, 9, 0.28),
+        0 8px 16px rgba(180, 83, 9, 0.18);
+    }
+    .gauge.bad .pct {
+      color: #b91c1c;
+      text-shadow:
+        1px 1px 0 rgba(255, 255, 255, 0.95),
+        -1px -1px 0 rgba(0, 0, 0, 0.08),
+        2px 3px 4px rgba(185, 28, 28, 0.28),
+        0 8px 16px rgba(185, 28, 28, 0.18);
+    }
+
+    /* Dark mode: relieve invertido (sombras claras abajo, oscuras arriba) */
+    [data-theme="dark"] .gauge-text .pct {
+      text-shadow:
+        -1px -1px 0 rgba(255, 255, 255, 0.08),
+        1px 1px 0 rgba(0, 0, 0, 0.6),
+        2px 3px 6px rgba(0, 0, 0, 0.5),
+        0 8px 20px rgba(0, 0, 0, 0.4);
+    }
 
     /* Badge de grado */
     .grade-badge {
@@ -859,6 +896,11 @@
     .seg.below { background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%); }
     .seg.sweet { background: linear-gradient(180deg, #34d399 0%, #10b981 100%); }
     .seg.above { background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); }
+    .stack-bar .seg.idle {
+      background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+      color: #1e293b;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+    }
 
     .stack-legend {
       display: flex;
@@ -882,12 +924,202 @@
       box-shadow: 0 0 0 2px rgba(255,255,255,0.85), 0 1px 3px rgba(23,32,51,0.14);
     }
 
+    /* === Banner de ralenti SLIM (justo despues del hero, delgado) === */
+    .idle-banner-slim {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      margin-bottom: 16px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .idle-banner-slim.sev-good { background: #f0fdf4; border-color: #bbf7d0; }
+    .idle-banner-slim.sev-warn { background: #fffbeb; border-color: #fde68a; }
+    .idle-banner-slim.sev-bad  { background: #fef2f2; border-color: #fecaca; }
+
+    [data-theme="dark"] .idle-banner-slim.sev-good { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.25); }
+    [data-theme="dark"] .idle-banner-slim.sev-warn { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.25); }
+    [data-theme="dark"] .idle-banner-slim.sev-bad  { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3); }
+
+    .idle-banner-slim .ib-icon {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    .idle-banner-slim.sev-good .ib-icon { background: #10b981; }
+    .idle-banner-slim.sev-warn .ib-icon { background: #f59e0b; }
+    .idle-banner-slim.sev-bad  .ib-icon { background: #ef4444; }
+    .idle-banner-slim .ib-icon svg { width: 15px; height: 15px; }
+
+    .idle-banner-slim .ib-label {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .idle-banner-slim .ib-pct {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .idle-banner-slim.sev-good .ib-pct { color: #047857; }
+    .idle-banner-slim.sev-warn .ib-pct { color: #b45309; }
+    .idle-banner-slim.sev-bad  .ib-pct { color: #b91c1c; }
+
+    [data-theme="dark"] .idle-banner-slim.sev-good .ib-pct { color: #34d399; }
+    [data-theme="dark"] .idle-banner-slim.sev-warn .ib-pct { color: #fbbf24; }
+    [data-theme="dark"] .idle-banner-slim.sev-bad  .ib-pct { color: #f87171; }
+
+    .idle-banner-slim .ib-detail {
+      font-size: 11.5px;
+      color: var(--muted);
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* === Banner de ralenti (separado de las tarjetas de conduccion) === */
+    .idle-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      border: 1px solid;
+      transition: background 0.2s;
+    }
+
+    .idle-banner.sev-good {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    .idle-banner.sev-warn {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+    .idle-banner.sev-bad {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    [data-theme="dark"] .idle-banner.sev-good { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.25); }
+    [data-theme="dark"] .idle-banner.sev-warn { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.25); }
+    [data-theme="dark"] .idle-banner.sev-bad  { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3); }
+
+    .idle-banner-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: white;
+    }
+
+    .sev-good .idle-banner-icon { background: #10b981; }
+    .sev-warn .idle-banner-icon { background: #f59e0b; }
+    .sev-bad  .idle-banner-icon { background: #ef4444; }
+
+    .idle-banner-icon svg { width: 24px; height: 24px; }
+
+    .idle-banner-content { flex: 1; min-width: 0; }
+
+    .idle-banner-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .severity-pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .severity-pill.sev-good { background: #d1fae5; color: #047857; }
+    .severity-pill.sev-warn { background: #fef3c7; color: #b45309; }
+    .severity-pill.sev-bad  { background: #fecaca; color: #b91c1c; }
+
+    [data-theme="dark"] .severity-pill.sev-good { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    [data-theme="dark"] .severity-pill.sev-warn { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    [data-theme="dark"] .severity-pill.sev-bad  { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+    .idle-banner-meta {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .idle-banner-stats { flex-shrink: 0; }
+
+    .idle-banner-stat {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .idle-banner-stat .big-pct {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .sev-good .idle-banner-stat .big-pct { color: #047857; }
+    .sev-warn .idle-banner-stat .big-pct { color: #b45309; }
+    .sev-bad  .idle-banner-stat .big-pct { color: #b91c1c; }
+
+    [data-theme="dark"] .sev-good .idle-banner-stat .big-pct { color: #34d399; }
+    [data-theme="dark"] .sev-warn .idle-banner-stat .big-pct { color: #fbbf24; }
+    [data-theme="dark"] .sev-bad  .idle-banner-stat .big-pct { color: #f87171; }
+
+    .idle-banner-stat .num {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .idle-banner-stat .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Titulo arriba de las tarjetas de conduccion */
+    .driving-breakdown-title {
+      margin: 18px 0 0 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     /* === Tarjetas de desglose === */
     .breakdown-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
-      margin-top: 16px;
+      margin-top: 10px;
     }
 
     .breakdown-card {
@@ -1047,8 +1279,8 @@
     /* === Vista Flota === */
     .fleet-hero {
       display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 34px;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 32px;
       align-items: center;
       padding: 28px 32px;
       background: var(--hero-bg);
@@ -1056,6 +1288,187 @@
       border-radius: var(--radius-lg);
       margin-bottom: 22px;
       box-shadow: var(--shadow-sm);
+    }
+
+    .fleet-meta-col {
+      min-width: 0;
+      padding: 16px 22px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    [data-theme="dark"] .fleet-meta-col {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    /* === Chart full-width de flota === */
+    .fleet-chart-card {
+      padding: 24px 28px;
+      background:
+        linear-gradient(180deg, rgba(15, 118, 110, 0.04) 0%, rgba(255,255,255,0) 100%),
+        var(--surface);
+      border-left: 4px solid var(--primary);
+    }
+
+    [data-theme="dark"] .fleet-chart-card {
+      background:
+        linear-gradient(180deg, rgba(45, 212, 191, 0.06) 0%, rgba(255,255,255,0) 100%),
+        var(--surface);
+    }
+
+    .fleet-chart-header {
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .fleet-chart {
+      width: 100%;
+    }
+
+    .fleet-chart > svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .fleet-chart .chart-bar { transition: opacity 0.15s; }
+    .fleet-chart .chart-bar:hover { opacity: 0.78; }
+
+    .fleet-chart .chart-bar.good  { fill: #10b981; }
+    .fleet-chart .chart-bar.warn  { fill: #f59e0b; }
+    .fleet-chart .chart-bar.poor  { fill: #ea580c; }
+    .fleet-chart .chart-bar.bad   { fill: #ef4444; }
+
+    .fleet-chart .chart-empty { fill: rgba(15, 23, 42, 0.10); }
+
+    .fleet-chart .chart-ref {
+      stroke: rgba(15, 23, 42, 0.12);
+      stroke-dasharray: 3 4;
+      stroke-width: 1;
+    }
+
+    .fleet-chart .chart-ref-strong {
+      stroke: rgba(16, 185, 129, 0.4);
+      stroke-dasharray: 3 4;
+      stroke-width: 1;
+    }
+
+    .fleet-chart .chart-label {
+      font-size: 11px;
+      fill: var(--muted);
+      text-anchor: middle;
+      font-weight: 600;
+    }
+
+    .fleet-chart .chart-label-muted {
+      font-size: 9px;
+      fill: var(--muted-soft);
+      text-anchor: middle;
+      font-weight: 500;
+    }
+
+    .fleet-chart .chart-y-label {
+      font-size: 10px;
+      fill: var(--muted-soft);
+      text-anchor: end;
+      font-weight: 500;
+    }
+
+    .fleet-chart .chart-score-big {
+      font-size: 13px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+
+    .fleet-chart .chart-score-big.good { fill: #047857; }
+    .fleet-chart .chart-score-big.warn { fill: #b45309; }
+    .fleet-chart .chart-score-big.poor { fill: #c2410c; }
+    .fleet-chart .chart-score-big.bad  { fill: #b91c1c; }
+
+    [data-theme="dark"] .fleet-chart .chart-empty { fill: rgba(255,255,255,0.08); }
+    [data-theme="dark"] .fleet-chart .chart-ref { stroke: rgba(255,255,255,0.12); }
+    [data-theme="dark"] .fleet-chart .chart-ref-strong { stroke: rgba(45, 212, 191, 0.4); }
+    [data-theme="dark"] .fleet-chart .chart-score-big.good { fill: #34d399; }
+    [data-theme="dark"] .fleet-chart .chart-score-big.warn { fill: #fbbf24; }
+    [data-theme="dark"] .fleet-chart .chart-score-big.poor { fill: #fb923c; }
+    [data-theme="dark"] .fleet-chart .chart-score-big.bad  { fill: #f87171; }
+
+    .fleet-avg-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 20px;
+      margin-right: 48px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: var(--radius-lg);
+      min-width: 170px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    [data-theme="dark"] .fleet-avg-col {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    .fleet-avg-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .fleet-avg-score {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .fleet-avg-score.grade-a { color: #059669; }
+    .fleet-avg-score.grade-b { color: #2563eb; }
+    .fleet-avg-score.grade-c { color: #d97706; }
+    .fleet-avg-score.grade-d { color: #ea580c; }
+    .fleet-avg-score.grade-f { color: #dc2626; }
+
+    [data-theme="dark"] .fleet-avg-score.grade-a { color: #34d399; }
+    [data-theme="dark"] .fleet-avg-score.grade-b { color: #60a5fa; }
+    [data-theme="dark"] .fleet-avg-score.grade-c { color: #fbbf24; }
+    [data-theme="dark"] .fleet-avg-score.grade-d { color: #fb923c; }
+    [data-theme="dark"] .fleet-avg-score.grade-f { color: #f87171; }
+
+    .fleet-avg-unit {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* Cuando la pantalla es angosta, apilamos en 2 filas (donut + meta arriba, avg debajo) */
+    @media (max-width: 1100px) {
+      .fleet-hero {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+      .fleet-avg-col {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        gap: 14px;
+        padding: 14px 20px;
+        min-width: 0;
+      }
+      .fleet-avg-label { margin-bottom: 0; }
+      .fleet-avg-score { font-size: 40px; }
+      .fleet-avg-unit { margin-top: 0; }
     }
 
     .donut-wrap {
@@ -1072,12 +1485,24 @@
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
+      pointer-events: none;
     }
     .donut-wrap .donut-text .big {
       font-size: 30px; font-weight: 800; color: var(--text); line-height: 1;
+      transition: color 0.2s ease;
     }
     .donut-wrap .donut-text .small {
       font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    /* Donut interactivo */
+    .donut-seg {
+      cursor: pointer;
+      transition: stroke-width 0.18s ease, filter 0.18s ease;
+    }
+    .donut-seg:hover {
+      filter: brightness(1.08);
     }
 
     .donut-legend {
@@ -1255,6 +1680,32 @@
 
     .fleet-controls-panel { display: none; }
 
+    /* Hint pequeno dentro del panel de controles */
+    .panel-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      padding: 6px 8px;
+      background: rgba(15, 118, 110, 0.06);
+      border-left: 2px solid var(--primary);
+      border-radius: 4px;
+      line-height: 1.3;
+    }
+
+    .panel-hint svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+
+    [data-theme="dark"] .panel-hint {
+      background: rgba(45, 212, 191, 0.08);
+    }
+
     /* === Desglose por dia === */
     .daily-section {
       margin-top: 24px;
@@ -1303,17 +1754,38 @@
 
     .day-bar {
       display: flex;
-      height: 24px;
+      height: 26px;
       border-radius: 6px;
       overflow: hidden;
       background: #e2e8f0;
+      cursor: default;
     }
 
     .day-bar .seg {
-      transition: width 0.6s ease;
+      transition: width 0.6s ease, filter 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+      cursor: pointer;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
-    .day-bar .seg.idle { background: #cbd5e1; }
+    .day-bar .seg:hover {
+      filter: brightness(1.1);
+    }
+
+    .day-bar .seg.idle {
+      background: #94a3b8;
+      color: #1e293b;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+    }
     .day-bar .seg.below { background: #f59e0b; }
     .day-bar .seg.sweet { background: #10b981; }
     .day-bar .seg.above { background: #ef4444; }
@@ -1603,6 +2075,95 @@
     .topbar-right {
       display: flex;
       align-items: center;
+    }
+
+    /* === Mini grafica diaria en el hero === */
+    .hero-chart {
+      width: 100%;
+      padding: 14px 16px 12px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    [data-theme="dark"] .hero-chart {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-chart-title {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+    }
+
+    .hero-chart > svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .hero-chart .chart-bar {
+      transition: opacity 0.15s;
+    }
+
+    .hero-chart .chart-bar:hover { opacity: 0.78; }
+
+    .hero-chart .chart-bar.good  { fill: #10b981; }
+    .hero-chart .chart-bar.warn  { fill: #f59e0b; }
+    .hero-chart .chart-bar.bad   { fill: #ef4444; }
+    .hero-chart .chart-bar.poor  { fill: #ea580c; }
+
+    .hero-chart .chart-empty {
+      fill: rgba(15, 23, 42, 0.12);
+    }
+
+    .hero-chart .chart-ref {
+      stroke: rgba(15, 23, 42, 0.18);
+      stroke-dasharray: 2 3;
+      stroke-width: 1;
+    }
+
+    .hero-chart .chart-label {
+      font-size: 9px;
+      fill: var(--muted);
+      text-anchor: middle;
+      font-weight: 600;
+    }
+
+    .hero-chart .chart-score {
+      font-size: 9px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+
+    .hero-chart .chart-score.good { fill: #047857; }
+    .hero-chart .chart-score.warn { fill: #b45309; }
+    .hero-chart .chart-score.bad  { fill: #b91c1c; }
+    .hero-chart .chart-score.poor { fill: #c2410c; }
+
+    [data-theme="dark"] .hero-chart .chart-empty { fill: rgba(255,255,255,0.08); }
+    [data-theme="dark"] .hero-chart .chart-ref { stroke: rgba(255,255,255,0.15); }
+    [data-theme="dark"] .hero-chart .chart-score.good { fill: #34d399; }
+    [data-theme="dark"] .hero-chart .chart-score.warn { fill: #fbbf24; }
+    [data-theme="dark"] .hero-chart .chart-score.bad  { fill: #f87171; }
+    [data-theme="dark"] .hero-chart .chart-score.poor { fill: #fb923c; }
+
+    /* Responsive: en pantallas menores apilar el chart abajo */
+    @media (max-width: 1100px) {
+      .result-hero {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+      .hero-chart {
+        grid-column: 1 / -1;
+        max-width: 100%;
+      }
     }
 
     /* === Barra de acciones (imprimir, exportar) === */
@@ -1933,6 +2494,15 @@
           <input type="datetime-local" id="date-to" />
         </div>
 
+        <div class="panel-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Maximo 90 dias. Periodos largos se procesan por partes (puede tardar mas).
+        </div>
+
         <button id="btn-execute">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -1964,16 +2534,21 @@
           <input type="datetime-local" id="fleet-date-to" />
         </div>
 
+        <div class="panel-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Maximo 30 dias para flota. Periodos largos toman varios minutos.
+        </div>
+
         <button id="btn-execute-fleet">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
           Ejecutar analisis
         </button>
-
-        <p class="hint" style="font-size: 11px; margin-top: 10px;">
-          Por rendimiento, recomendado rango maximo 3 dias para flotas grandes.
-        </p>
       </div>
 
       <div class="nav-spacer"></div>
@@ -2094,7 +2669,7 @@
 
   <script>
     const DEFAULT_WIALON_HOST = "https://hst-api.wialon.com";
-    const STORAGE_KEY = "sweetspot_rpm_ranges_v1";
+    const STORAGE_KEY = "sweetspot_rpm_ranges_v2";
     const THEME_KEY = "sweetspot_theme_v1";
 
     // === Detectar SID / host desde URL (cuando Wialon nos abre como app) ===
@@ -2148,14 +2723,10 @@
 
     // Rangos por defecto (basados en lo que vimos en el Profile de Wialon)
     const DEFAULT_RANGES = {
-      "Pickup":          { min: 1500, max: 2500 },
-      "Van":             { min: 1500, max: 2400 },
-      "Truck":           { min: 1200, max: 1800 },
-      "Heavy truck":     { min: 1100, max: 1600 },
-      "Dump truck":      { min: 1100, max: 1700 },
-      "Passenger":       { min: 1500, max: 2500 },
-      "Special machinery": { min: 1200, max: 2000 },
-      "Default":         { min: 1200, max: 2000 },
+      "Carro liviano":  { min: 1200, max: 2500 },
+      "Camion":         { min: 1200, max: 2300 },
+      "Camion grande":  { min: 1200, max: 1800 },
+      "Default":        { min: 1200, max: 2500 },  // mismo que Carro liviano
     };
 
     // Estado de la app
@@ -2219,17 +2790,11 @@
 
     // Calcula score compuesto 0-100 a partir de las metricas
     function computeScore(r) {
+      // Score = % del tiempo conduciendo que estuvo en Sweet Spot.
+      // Ralenti y otras categorias se evaluan aparte (banners separados).
       const drivingSec = r.sweetSec + r.belowSec + r.aboveSec;
       const pctSweet = drivingSec > 0 ? (r.sweetSec / drivingSec) * 100 : 0;
-      const pctIdleTotal = r.totalEngineSec > 0 ? (r.idleSec / r.totalEngineSec) * 100 : 0;
-
-      // Componente principal (85%): % en sweet spot sobre conduccion
-      // Componente ralenti (15%): penaliza si excede 15% del tiempo total
-      // Idle component: 100 cuando idle <= 15%, baja linealmente, 0 cuando idle >= 65%
-      const idleComponent = Math.max(0, 100 - Math.max(0, pctIdleTotal - 15) * 2);
-
-      const score = pctSweet * 0.85 + idleComponent * 0.15;
-      return Math.round(score * 10) / 10;
+      return Math.round(pctSweet * 10) / 10;
     }
 
     // Devuelve { letter, label, cssClass } segun el score
@@ -2323,19 +2888,59 @@
       });
     }
 
+    // Mapeo de subcategorias de Wialon (lo que devuelve el API) -> nuestras 3 categorias.
+    // Wialon clasifica el vehicle_type en 2-3 niveles (Cargo transport -> Truck -> tonnes).
+    // El API devuelve el nivel mas especifico seleccionado.
+    const WIALON_VEHICLE_TYPE_MAP = {
+      // === CARRO LIVIANO === autos, pickups, vans, microbuses
+      "passenger car": "Carro liviano", "passenger_car": "Carro liviano", "passenger": "Carro liviano",
+      "passenger transport": "Carro liviano", "passenger_transport": "Carro liviano",
+      "sedan": "Carro liviano", "wagon": "Carro liviano", "station wagon": "Carro liviano", "suv": "Carro liviano",
+      "coupe": "Carro liviano", "hatchback": "Carro liviano", "convertible": "Carro liviano",
+      "regular sedan car": "Carro liviano", "regular sedan": "Carro liviano",
+      "pickup": "Carro liviano",
+      "van": "Carro liviano", "minivan": "Carro liviano", "lcv": "Carro liviano",
+      "minibus": "Carro liviano", "microbus": "Carro liviano",
+
+      // === CAMION === camion mediano, buses, dump trucks
+      "cargo transport": "Camion", "cargo_transport": "Camion",
+      "truck": "Camion", "lorry": "Camion",
+      "dump truck": "Camion", "dump_truck": "Camion", "tipper": "Camion",
+      "bus": "Camion", "trolleybus": "Camion", "tram": "Camion",
+
+      // === CAMION GRANDE === heavy duty, maquinaria pesada
+      "heavy truck": "Camion grande", "heavy_truck": "Camion grande",
+      "special machinery": "Camion grande", "special_machinery": "Camion grande",
+      "excavator": "Camion grande", "bulldozer": "Camion grande",
+      "tractor": "Camion grande", "crane": "Camion grande", "loader": "Camion grande",
+
+      // Others (sin categoria especifica) -> Default (= Carro liviano)
+      "others": "Default", "other": "Default",
+    };
+
     function getRangeForVehicleType(vehicleType) {
       if (!vehicleType) return state.ranges["Default"];
-      // Busqueda case-insensitive
-      const key = Object.keys(state.ranges).find(function(k) {
-        return k.toLowerCase() === String(vehicleType).toLowerCase();
+
+      const lower = String(vehicleType).toLowerCase().trim();
+
+      // 1. Match exacto en nuestra tabla de rangos
+      const exact = Object.keys(state.ranges).find(function(k) {
+        return k.toLowerCase() === lower;
       });
-      if (key) return state.ranges[key];
-      // Busqueda parcial (ej. "Truck (from 3.5 to 12 tonnes)" matchea con "Truck")
-      const lower = String(vehicleType).toLowerCase();
+      if (exact) return state.ranges[exact];
+
+      // 2. Mapeo de subcategorias de Wialon (ej. "Wagon" -> "Passenger")
+      if (WIALON_VEHICLE_TYPE_MAP[lower]) {
+        const mappedKey = WIALON_VEHICLE_TYPE_MAP[lower];
+        if (state.ranges[mappedKey]) return state.ranges[mappedKey];
+      }
+
+      // 3. Busqueda parcial (por si el valor incluye alguno de nuestros tipos)
       const partial = Object.keys(state.ranges).find(function(k) {
-        return lower.includes(k.toLowerCase()) || k.toLowerCase().includes(lower);
+        return lower.indexOf(k.toLowerCase()) !== -1 || k.toLowerCase().indexOf(lower) !== -1;
       });
       if (partial) return state.ranges[partial];
+
       return state.ranges["Default"];
     }
 
@@ -2545,10 +3150,11 @@
         console.error("Error cargando librerias:", e);
       }
 
+      // Flags descubiertos via debug del SDK de Wialon
       const FLAG_BASE = 1;
       const FLAG_SENSORS = 4096;
-      const FLAG_PROFILE_FIELDS = 256;
       const FLAG_LAST_MESSAGE = 1024;
+      const FLAG_PROFILE_FIELDS = 8388608;   // Item.dataFlag.profileFields (0x800000)
       const FLAG_UNITGROUP_UNITS = 1024;
 
       const unitFlags = FLAG_BASE | FLAG_SENSORS | FLAG_PROFILE_FIELDS | FLAG_LAST_MESSAGE;
@@ -2638,23 +3244,86 @@
       return null;
     }
 
-    function getVehicleType(unit) {
-      const fields = unit.getProfileFields() || [];
-      // Los profile fields vienen como objeto {id: {id, n, v}}
-      const arr = Array.isArray(fields) ? fields : Object.values(fields);
+    // Busca el sensor de ignicion (motor encendido/apagado) de la unidad.
+    // Devuelve el sensor o null si no lo encuentra.
+    function findIgnitionSensor(unit) {
+      const IGNITION_TYPES = ["engine operation", "engine_operation", "engine ignition", "engine_ignition"];
 
-      for (let i = 0; i < arr.length; i++) {
-        const f = arr[i];
-        const name = String(f.n || "").toLowerCase();
-        if (name === "vehicle_class" || name === "vehicle_type" || name === "vehicle type" || name === "vehicle class") {
-          return f.v;
+      const sensors = unit.getSensors() || {};
+      const ids = Object.keys(sensors);
+
+      // DEBUG: imprimir todos los sensores y sus tipos para diagnostico
+      console.log("[findIgnitionSensor] Buscando en", ids.length, "sensores de", unit.getName());
+      ids.forEach(function(id) {
+        const s = sensors[id];
+        if (s) console.log("  - name:", s.n, "| type:", s.t, "| param:", s.p);
+      });
+
+      // 1. Buscar por tipo estandar de Wialon
+      for (let i = 0; i < ids.length; i++) {
+        const s = sensors[ids[i]];
+        if (!s) continue;
+        const type = String(s.t || "").toLowerCase();
+        if (IGNITION_TYPES.indexOf(type) !== -1) {
+          console.log("[findIgnitionSensor] MATCH por tipo:", s.n, "(", s.t, ")");
+          return s;
         }
       }
+
+      // 2. Fallback: nombre que contenga "ignition" o "ignicion" o "estado de motor"
+      for (let i = 0; i < ids.length; i++) {
+        const s = sensors[ids[i]];
+        if (!s) continue;
+        const name = String(s.n || "").toLowerCase();
+        if (name.indexOf("ignition") !== -1 || name.indexOf("ignicion") !== -1 ||
+            name.indexOf("estado de motor") !== -1 || name.indexOf("engine on") !== -1) {
+          console.log("[findIgnitionSensor] MATCH por nombre:", s.n);
+          return s;
+        }
+      }
+
+      console.log("[findIgnitionSensor] NO encontrado");
       return null;
     }
 
-    function calculateSweetSpot(messages, sensor, unit, range) {
-      const SPEED_STOPPED_KMH = 3; // velocidad menor a esto se considera parado
+    function getVehicleType(unit) {
+      const fields = unit.getProfileFields() || [];
+      const arr = Array.isArray(fields) ? fields : Object.values(fields);
+
+      // DEBUG: imprimir TODOS los profile fields para diagnostico
+      console.log("[getVehicleType] Profile fields de", unit.getName(), ":", arr);
+
+      // 1. Buscar por nombre que CONTENGA "vehicle" y ("type" o "class")
+      for (let i = 0; i < arr.length; i++) {
+        const f = arr[i];
+        if (!f) continue;
+        const name = String(f.n || "").toLowerCase().replace(/[_\s]/g, "");
+        if (name.indexOf("vehicle") !== -1 &&
+            (name.indexOf("type") !== -1 || name.indexOf("class") !== -1)) {
+          console.log("[getVehicleType] MATCH por 'vehicle+type/class':", f.n, "=", f.v);
+          return f.v;
+        }
+      }
+
+      // 2. Buscar por nombre exacto "type" o "class" (a veces vienen solos)
+      for (let i = 0; i < arr.length; i++) {
+        const f = arr[i];
+        if (!f) continue;
+        const name = String(f.n || "").toLowerCase().trim();
+        if (name === "type" || name === "class" || name === "tipo" || name === "tipo_vehiculo") {
+          console.log("[getVehicleType] MATCH por nombre simple:", f.n, "=", f.v);
+          return f.v;
+        }
+      }
+
+      console.log("[getVehicleType] NO encontrado tipo de vehiculo");
+      return null;
+    }
+
+    function calculateSweetSpot(messages, sensor, unit, range, ignitionSensor) {
+      const SPEED_STOPPED_KMH = 3;   // velocidad menor a esto se considera parado
+      const ENGINE_ON_MIN_RPM = 800; // RPM minimo de fallback si no hay sensor de ignicion
+                                     // (umbral conservador para evitar contar ruido/transitorios)
 
       let totalEngineSec = 0;
       let idleSec = 0;     // motor encendido + parado
@@ -2663,6 +3332,7 @@
       let aboveSec = 0;    // RPM alto + manejando (sobre-revolucion)
       let evaluatedMessages = 0;
       let invalidMessages = 0;
+      const usingIgnition = !!ignitionSensor;
 
       const daily = {};
 
@@ -2689,6 +3359,10 @@
 
       const sorted = messages.slice().sort(function(a, b) { return a.t - b.t; });
 
+      // DEBUG: muestrear los primeros mensajes para ver que valores devuelven los sensores
+      const DEBUG_SAMPLES = 5;
+      let debugCount = 0;
+
       for (let i = 0; i < sorted.length - 1; i++) {
         const msg = sorted[i];
         const next = sorted[i + 1];
@@ -2696,24 +3370,57 @@
 
         if (dt <= 0 || dt > 3600) continue;
 
-        let rpm;
+        // Leer RPM (sin descartar mensaje si falla; lo usamos solo si es valido)
+        let rpm = null;
+        let rpmValid = false;
         try {
-          rpm = unit.calculateSensorValue(sensor, msg);
-        } catch (e) {
-          invalidMessages++;
-          continue;
+          const rpmRaw = unit.calculateSensorValue(sensor, msg);
+          if (rpmRaw !== undefined && rpmRaw !== null && rpmRaw !== -348201.3876) {
+            rpm = rpmRaw;
+            rpmValid = true;
+          }
+        } catch (e) { /* rpm queda invalido */ }
+
+        // DEBUG: log de muestreo de primeros mensajes
+        if (debugCount < DEBUG_SAMPLES && usingIgnition) {
+          let ignDbg = null;
+          try { ignDbg = unit.calculateSensorValue(ignitionSensor, msg); } catch (e) {}
+          const speedDbg = (msg.pos && typeof msg.pos.s === "number") ? msg.pos.s : "no-pos";
+          console.log(`[DEBUG msg ${debugCount}] t=${new Date(msg.t*1000).toLocaleString()} | ign=${ignDbg} (${typeof ignDbg}) | rpm=${rpm} (valid=${rpmValid}) | speed=${speedDbg}`);
+          debugCount++;
         }
 
-        if (rpm === undefined || rpm === null || rpm === -348201.3876) {
-          invalidMessages++;
-          continue;
+        // Determinar si el motor esta realmente encendido.
+        // Si hay sensor de ignicion, esa es la fuente primaria (NO requiere RPM valido).
+        // Si no, caemos al threshold de RPM (que si requiere RPM valido).
+        let isEngineOn;
+        if (usingIgnition) {
+          let ign = null;
+          try {
+            ign = unit.calculateSensorValue(ignitionSensor, msg);
+          } catch (e) { /* ign null */ }
+          if (ign === 1 || ign === true) {
+            isEngineOn = true;
+          } else if (ign === 0 || ign === false) {
+            isEngineOn = false;
+          } else {
+            // Ignicion invalida: fallback a RPM (si esta disponible)
+            isEngineOn = rpmValid && rpm >= ENGINE_ON_MIN_RPM;
+          }
+        } else {
+          // Sin sensor de ignicion: usar RPM como heuristico
+          if (!rpmValid) {
+            invalidMessages++;
+            continue;
+          }
+          isEngineOn = rpm >= ENGINE_ON_MIN_RPM;
         }
 
         evaluatedMessages++;
 
-        if (rpm <= 0) continue;
+        if (!isEngineOn) continue;
 
-        // Velocidad del mensaje (km/h). Si no hay posicion, asumimos parado.
+        // Motor encendido - contar siempre el tiempo
         const speed = (msg.pos && typeof msg.pos.s === "number") ? msg.pos.s : 0;
         const isMoving = speed >= SPEED_STOPPED_KMH;
 
@@ -2723,11 +3430,21 @@
         dayBucket.totalEngineSec += dt;
 
         if (!isMoving) {
-          // Motor encendido pero parado = ralenti (no cuenta como conduccion)
+          // Ralenti: motor encendido, parado. NO necesita RPM.
           idleSec += dt;
           dayBucket.idleSec += dt;
-        } else if (rpm < range.min) {
-          // Manejando con RPM bajo = lugging
+          continue;
+        }
+
+        // Moviendose: necesitamos RPM para categorizar.
+        // Si no hay RPM valido, NO categorizamos (queda contado como tiempo motor
+        // pero no entra en below/sweet/above). El resultado es que driving < total - idle.
+        if (!rpmValid) {
+          invalidMessages++;
+          continue;
+        }
+
+        if (rpm < range.min) {
           belowSec += dt;
           dayBucket.belowSec += dt;
         } else if (rpm > range.max) {
@@ -2745,60 +3462,91 @@
       };
     }
 
-    function loadMessagesAndCalculate(unit, fromUnix, toUnix, callback) {
+    // Constante: tamano maximo por chunk (Wialon tiene limites internos por llamada).
+    // 7 dias es un sweet spot entre evitar el limite y minimizar el numero de llamadas.
+    const CHUNK_DAYS = 7;
+    const CHUNK_SECONDS = CHUNK_DAYS * 24 * 3600;
+
+    // Divide un periodo [fromUnix, toUnix] en chunks no superpuestos
+    function splitIntoChunks(fromUnix, toUnix) {
+      const chunks = [];
+      let start = fromUnix;
+      while (start <= toUnix) {
+        // Cada chunk cubre hasta CHUNK_SECONDS pero sin sobrepasar toUnix
+        const end = Math.min(start + CHUNK_SECONDS - 1, toUnix);
+        chunks.push({ from: start, to: end });
+        start = end + 1;
+      }
+      return chunks;
+    }
+
+    // Carga UN solo chunk de mensajes (helper interno)
+    function loadSingleChunk(unitId, fromUnix, toUnix, callback) {
       const session = wialon.core.Session.getInstance();
       const ml = session.getMessagesLoader();
 
-      console.log("Cargando mensajes:", {
-        unitId: unit.getId(),
-        unitName: unit.getName(),
-        fromUnix: fromUnix,
-        toUnix: toUnix,
-        fromDate: new Date(fromUnix * 1000).toString(),
-        toDate: new Date(toUnix * 1000).toString(),
-      });
-
-      // Limpiar cualquier carga previa
       ml.unload(function() {
-        // Flags: data messages (tipo 0). Mask 0xFF00 matchea solo los bits de tipo.
-        // loadCount 0 = todos los mensajes en el intervalo
         ml.loadInterval(
-          unit.getId(),
-          fromUnix,
-          toUnix,
-          0x0000,
-          0xFF00,
-          0,
+          unitId, fromUnix, toUnix, 0x0000, 0xFF00, 0,
           function(code, data) {
-            console.log("loadInterval respuesta - code:", code, "data:", data);
-
             if (code) {
               callback(new Error(wialon.core.Errors.getErrorText(code) + " (codigo " + code + ")"), null);
               return;
             }
-
-            // data puede ser un numero (cantidad de mensajes) o un objeto con .messages
             const count = typeof data === "number" ? data : (data && data.count) || 0;
-            console.log("Cantidad reportada por loadInterval:", count);
-
             if (count === 0) {
-              callback(null, { messages: [] });
+              callback(null, []);
               return;
             }
-
-            // Cargar los mensajes ya cargados en el rango
             ml.getMessages(0, count - 1, function(code2, messages) {
-              console.log("getMessages respuesta - code:", code2, "primeros 3 mensajes:", messages && messages.slice(0, 3));
-
               if (code2) {
                 callback(new Error(wialon.core.Errors.getErrorText(code2) + " (codigo " + code2 + ")"), null);
                 return;
               }
-              callback(null, { messages: messages || [] });
+              callback(null, messages || []);
             });
           }
         );
       });
+    }
+
+    // Carga mensajes en chunks de 7 dias secuencialmente y los concatena.
+    // onProgress(currentChunk, totalChunks) opcional - se llama antes de cada chunk
+    function loadMessagesChunked(unit, fromUnix, toUnix, onProgress, callback) {
+      const chunks = splitIntoChunks(fromUnix, toUnix);
+      const allMessages = [];
+      const unitId = unit.getId();
+
+      console.log("[Chunking]", unit.getName(), "->", chunks.length, "chunks de", CHUNK_DAYS, "dias");
+
+      function processNext(i) {
+        if (i >= chunks.length) {
+          // Ordenar todos los mensajes por timestamp (los chunks vienen ordenados,
+          // pero por si acaso y por consistencia con duplicates en bordes)
+          allMessages.sort(function(a, b) { return a.t - b.t; });
+          callback(null, { messages: allMessages });
+          return;
+        }
+        if (onProgress) onProgress(i + 1, chunks.length);
+        const chunk = chunks[i];
+        loadSingleChunk(unitId, chunk.from, chunk.to, function(err, messages) {
+          if (err) {
+            callback(err, null);
+            return;
+          }
+          // Agregar mensajes (forEach es seguro para arrays grandes a diferencia de spread)
+          messages.forEach(function(m) { allMessages.push(m); });
+          processNext(i + 1);
+        });
+      }
+
+      processNext(0);
+    }
+
+    // Wrapper retrocompatible: si el periodo es <= 7 dias, una sola llamada;
+    // si es mas largo, usa chunking.
+    function loadMessagesAndCalculate(unit, fromUnix, toUnix, callback) {
+      loadMessagesChunked(unit, fromUnix, toUnix, null, callback);
     }
 
     // ----------------------------------------------------------------
@@ -2827,8 +3575,9 @@
         showAlert(els.formAlert, "error", "La fecha 'Hasta' debe ser mayor que 'Desde'.");
         return;
       }
-      if (toUnix - fromUnix > 7 * 24 * 3600) {
-        showAlert(els.formAlert, "error", "El rango maximo permitido es 7 dias.");
+      // Limite generoso para individual: 90 dias (3 meses). Periodos mayores se procesan en chunks.
+      if (toUnix - fromUnix > 90 * 24 * 3600) {
+        showAlert(els.formAlert, "error", "El rango maximo permitido es 90 dias (3 meses).");
         return;
       }
 
@@ -2845,6 +3594,11 @@
         return;
       }
 
+      const ignitionSensor = findIgnitionSensor(unit);
+      console.log("[Analysis] Unidad:", unit.getName(),
+                  "| Sensor RPM:", sensor.n,
+                  "| Sensor Ignicion:", ignitionSensor ? ignitionSensor.n : "NO ENCONTRADO (usando RPM>=800)");
+
       const vehicleType = getVehicleType(unit);
       const range = getRangeForVehicleType(vehicleType);
 
@@ -2853,9 +3607,19 @@
       const emptyState = document.getElementById("empty-state");
       if (emptyState) emptyState.classList.add("hidden");
       els.resultsCard.classList.remove("hidden");
-      els.resultsContent.innerHTML = '<div class="loading">Cargando mensajes del intervalo...</div>';
+      els.resultsContent.innerHTML = '<div class="loading">Iniciando carga...</div>';
 
-      loadMessagesAndCalculate(unit, fromUnix, toUnix, function(err, data) {
+      // Callback de progreso: actualiza el loading message segun los chunks
+      const onChunkProgress = function(current, total) {
+        if (total > 1) {
+          els.resultsContent.innerHTML =
+            `<div class="loading">Cargando datos: parte ${current} de ${total} (${CHUNK_DAYS} dias cada una)...</div>`;
+        } else {
+          els.resultsContent.innerHTML = '<div class="loading">Cargando mensajes del intervalo...</div>';
+        }
+      };
+
+      loadMessagesChunked(unit, fromUnix, toUnix, onChunkProgress, function(err, data) {
         els.btnExecute.disabled = false;
         els.btnExecute.textContent = "Ejecutar analisis";
 
@@ -2865,7 +3629,7 @@
         }
 
         const messages = (data && data.messages) || [];
-        const result = calculateSweetSpot(messages, sensor, unit, range);
+        const result = calculateSweetSpot(messages, sensor, unit, range, ignitionSensor);
 
         renderResult(unit, sensor, vehicleType, range, result, fromUnix, toUnix);
       });
@@ -2901,8 +3665,10 @@
         showAlert(els.fleetFormAlert, "error", "La fecha 'Hasta' debe ser mayor que 'Desde'.");
         return;
       }
-      if (toUnix - fromUnix > 7 * 24 * 3600) {
-        showAlert(els.fleetFormAlert, "error", "El rango maximo permitido es 7 dias.");
+      // Limite para flota: 30 dias (multiplicado por N unidades puede ser muy lento).
+      // Periodos mayores se procesan en chunks de 7 dias por unidad.
+      if (toUnix - fromUnix > 30 * 24 * 3600) {
+        showAlert(els.fleetFormAlert, "error", "El rango maximo permitido para flota es 30 dias.");
         return;
       }
 
@@ -2936,13 +3702,19 @@
       const total = unitIds.length;
       const fleetResults = [];
 
-      function renderProgress(currentIndex, currentName) {
+      // Calcular total de chunks anticipado (para porcentaje global mas preciso)
+      const chunksPerUnit = splitIntoChunks(fromUnix, toUnix).length;
+
+      function renderProgress(currentIndex, currentName, chunkInfo) {
         const pct = total > 0 ? Math.round(((currentIndex) / total) * 100) : 0;
+        const chunkText = chunkInfo && chunksPerUnit > 1
+          ? ` <span style="color:var(--muted);">(parte ${chunkInfo.current} de ${chunkInfo.total})</span>`
+          : '';
         els.fleetProgressContent.innerHTML = `
           <div class="fleet-progress">
             <h3>Analizando flota...</h3>
             <div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>
-            <div class="progress-text">${currentIndex} / ${total} unidades · ${escapeHtml(currentName || "")}</div>
+            <div class="progress-text">${currentIndex} / ${total} unidades · ${escapeHtml(currentName || "")}${chunkText}</div>
           </div>
         `;
       }
@@ -2973,17 +3745,23 @@
           return;
         }
 
+        const ignitionSensor = findIgnitionSensor(unit);
+
         const vehicleType = getVehicleType(unit);
         const range = getRangeForVehicleType(vehicleType);
 
-        loadMessagesAndCalculate(unit, fromUnix, toUnix, function(err, data) {
+        const onChunkProgress = function(current, totalChunks) {
+          renderProgress(i, unit.getName(), { current: current, total: totalChunks });
+        };
+
+        loadMessagesChunked(unit, fromUnix, toUnix, onChunkProgress, function(err, data) {
           if (err) {
             fleetResults.push({ unitId: unitId, unitName: unit.getName(), skipReason: "Error: " + err.message });
             processNext(i + 1);
             return;
           }
           const messages = (data && data.messages) || [];
-          const result = calculateSweetSpot(messages, sensor, unit, range);
+          const result = calculateSweetSpot(messages, sensor, unit, range, ignitionSensor);
           const score = computeScore(result);
           const grade = gradeFromScore(score);
 
@@ -3037,7 +3815,7 @@
       els.fleetResultsContent.innerHTML = `
         <div class="fleet-hero">
           ${renderDonut(dist, evaluated.length, fleetGrade)}
-          <div>
+          <div class="fleet-meta-col">
             <div class="fleet-summary-title">Resumen de flota</div>
             <div class="fleet-summary-meta">
               Periodo: ${escapeHtml(fromDate.toLocaleDateString())} - ${escapeHtml(toDate.toLocaleDateString())} ·
@@ -3051,7 +3829,18 @@
               <div class="item"><span class="dot" style="background:#ef4444;"></span><span class="count">${dist.F}</span> Critico (F) · <40</div>
             </div>
           </div>
+          <div class="fleet-avg-col">
+            <div class="fleet-avg-label">Promedio de flota</div>
+            <div class="fleet-avg-score ${fleetGrade.cssClass}">${avgScore.toFixed(1)}</div>
+            <div class="fleet-avg-unit">/ 100</div>
+            <div class="grade-badge ${fleetGrade.cssClass}" style="margin-top: 8px;">
+              <span class="letter">${fleetGrade.letter}</span>
+              ${fleetGrade.label}
+            </div>
+          </div>
         </div>
+
+        ${renderFleetDailyChart(evaluated, fromUnix, toUnix)}
 
         ${renderFleetObservations(evaluated, dist, avgScore, ranked, skipped, noActivity)}
 
@@ -3074,39 +3863,228 @@
           </tbody>
         </table>
       `;
+
+      // Activar interactividad del donut despues de insertarlo en el DOM
+      activateDonutInteractivity();
+    }
+
+    // Genera un chart full-width con la evolucion del score promedio de la flota dia a dia
+    function renderFleetDailyChart(evaluated, fromUnix, toUnix) {
+      const pad = (n) => String(n).padStart(2, "0");
+
+      // Helper para calcular score de UN dia de UNA unidad
+      // Score = % en Sweet Spot del tiempo conduciendo (igual que computeScore)
+      function scoreForDay(dayData) {
+        if (!dayData || dayData.totalEngineSec === 0) return null;
+        const drivingSec = dayData.sweetSec + dayData.belowSec + dayData.aboveSec;
+        if (drivingSec === 0) return null;
+        return (dayData.sweetSec / drivingSec) * 100;
+      }
+
+      // Construir lista de dias
+      const days = [];
+      const start = new Date(fromUnix * 1000); start.setHours(0, 0, 0, 0);
+      const end = new Date(toUnix * 1000); end.setHours(0, 0, 0, 0);
+      const cursor = new Date(start);
+      while (cursor <= end) {
+        const key = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(cursor.getDate())}`;
+
+        let sumScore = 0;
+        let activeUnits = 0;
+        evaluated.forEach(function(r) {
+          const dayData = r.result.daily && r.result.daily[key];
+          const s = scoreForDay(dayData);
+          if (s !== null) {
+            sumScore += s;
+            activeUnits++;
+          }
+        });
+
+        days.push({
+          key,
+          dayNum: pad(cursor.getDate()),
+          monthNum: pad(cursor.getMonth() + 1),
+          avgScore: activeUnits > 0 ? sumScore / activeUnits : null,
+          activeUnits,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      if (days.length < 2) return "";
+
+      // Dimensiones (full width)
+      const W = 900, H = 220;
+      const padLeft = 40, padRight = 16, padTop = 18, padBottom = 38;
+      const chartW = W - padLeft - padRight;
+      const chartH = H - padTop - padBottom;
+
+      const barCount = days.length;
+      const barGap = Math.min(14, chartW / (barCount * 4));
+      const barW = Math.min(60, (chartW - barGap * (barCount - 1)) / barCount);
+      const totalBarsWidth = barW * barCount + barGap * (barCount - 1);
+      const offsetX = padLeft + (chartW - totalBarsWidth) / 2;
+
+      // Cuando hay muchos dias, etiquetar solo algunos numeros
+      const labelEvery = barCount <= 10 ? 1 : barCount <= 20 ? 2 : Math.ceil(barCount / 12);
+
+      const yFor = (score) => padTop + (chartH - (score / 100) * chartH);
+      const ref55 = yFor(55);
+      const ref70 = yFor(70);
+      const ref85 = yFor(85);
+
+      // Etiquetas en el eje Y
+      const yLabels = [
+        { val: 0,  y: yFor(0) },
+        { val: 55, y: ref55 },
+        { val: 70, y: ref70 },
+        { val: 85, y: ref85 },
+        { val: 100, y: yFor(100) },
+      ];
+
+      const yAxis = yLabels.map(function(l) {
+        return `<text class="chart-y-label" x="${padLeft - 6}" y="${l.y + 3}">${l.val}</text>`;
+      }).join("");
+
+      const refLines = `
+        <line class="chart-ref-strong" x1="${padLeft}" y1="${ref85}" x2="${W - padRight}" y2="${ref85}"></line>
+        <line class="chart-ref" x1="${padLeft}" y1="${ref70}" x2="${W - padRight}" y2="${ref70}"></line>
+        <line class="chart-ref" x1="${padLeft}" y1="${ref55}" x2="${W - padRight}" y2="${ref55}"></line>
+      `;
+
+      const bars = days.map(function(d, i) {
+        const x = offsetX + i * (barW + barGap);
+        const numY = H - padBottom + 16;
+        const showLabel = i % labelEvery === 0 || i === barCount - 1;
+        const showScore = barW >= 18;
+
+        if (d.avgScore === null) {
+          return `
+            <rect class="chart-empty" x="${x}" y="${yFor(3)}" width="${barW}" height="${(3/100)*chartH}" rx="2"></rect>
+            ${showLabel ? `<text class="chart-label" x="${x + barW/2}" y="${numY}">${d.dayNum}/${d.monthNum}</text>` : ''}
+          `;
+        }
+
+        let cls = "good";
+        if (d.avgScore < 40) cls = "bad";
+        else if (d.avgScore < 55) cls = "poor";
+        else if (d.avgScore < 70) cls = "warn";
+
+        const barHeight = (d.avgScore / 100) * chartH;
+        const barY = padTop + (chartH - barHeight);
+        const scoreY = barY - 5;
+
+        return `
+          <rect class="chart-bar ${cls}" x="${x}" y="${barY}" width="${barW}" height="${barHeight}" rx="3"></rect>
+          ${showScore ? `<text class="chart-score-big ${cls}" x="${x + barW/2}" y="${scoreY}">${d.avgScore.toFixed(0)}</text>` : ''}
+          ${showLabel ? `<text class="chart-label" x="${x + barW/2}" y="${numY}">${d.dayNum}/${d.monthNum}</text>` : ''}
+        `;
+      }).join("");
+
+      return `
+        <div class="card fleet-chart-card">
+          <div class="fleet-chart-header">
+            <h3 class="leaderboard-title" style="margin: 0;">Score promedio de flota por dia</h3>
+          </div>
+          <div class="fleet-chart">
+            <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+              ${refLines}
+              ${bars}
+              ${yAxis}
+            </svg>
+          </div>
+        </div>
+      `;
     }
 
     function renderDonut(dist, total, fleetGrade) {
-      const radius = 70;
+      const radius = 72;
+      const strokeWidth = 26;
       const circumference = 2 * Math.PI * radius;
       const colors = { A: "#10b981", B: "#3b82f6", C: "#f59e0b", D: "#ea580c", F: "#ef4444" };
+      const labels = {
+        A: "Excelente",
+        B: "Bueno",
+        C: "Aceptable",
+        D: "Deficiente",
+        F: "Critico",
+      };
+
+      const presentGrades = ["A", "B", "C", "D", "F"].filter(function(g) { return dist[g] > 0; });
+      const segmentCount = presentGrades.length;
+
+      const gap = segmentCount > 1 ? 4 : 0;
+      const totalGap = gap * segmentCount;
+      const availableCircumference = circumference - totalGap;
+
       let offset = 0;
-      const segments = ["A", "B", "C", "D", "F"].map(function(g) {
+      const segments = presentGrades.map(function(g) {
         const value = dist[g];
-        if (value === 0) return "";
-        const dashLength = (value / total) * circumference;
-        const dashGap = circumference - dashLength;
+        const pct = (value / total) * 100;
+        const segLength = (value / total) * availableCircumference;
+        const dashGap = circumference - segLength;
         const seg = `
-          <circle cx="100" cy="100" r="${radius}" fill="none" stroke="${colors[g]}" stroke-width="22"
-                  stroke-dasharray="${dashLength} ${dashGap}"
-                  stroke-dashoffset="${-offset}"></circle>
+          <circle class="donut-seg" cx="100" cy="100" r="${radius}" fill="none" stroke="${colors[g]}"
+                  stroke-width="${strokeWidth}"
+                  stroke-linecap="butt"
+                  stroke-dasharray="${segLength} ${dashGap}"
+                  stroke-dashoffset="${-offset}"
+                  data-grade="${g}"
+                  data-label="${labels[g]} (${g})"
+                  data-count="${value}"
+                  data-pct="${pct.toFixed(1)}"
+                  data-color="${colors[g]}">
+            <title>${labels[g]} (${g}): ${value} ${value === 1 ? "unidad" : "unidades"} (${pct.toFixed(1)}%)</title>
+          </circle>
         `;
-        offset += dashLength;
+        offset += segLength + gap;
         return seg;
       }).join("");
 
       return `
         <div class="donut-wrap">
-          <svg width="200" height="200" viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="22"></circle>
+          <svg width="200" height="200" viewBox="0 0 200 200" id="fleet-donut-svg">
+            <circle cx="100" cy="100" r="${radius}" fill="none" stroke="rgba(15, 23, 42, 0.06)" stroke-width="${strokeWidth}"></circle>
             ${segments}
           </svg>
-          <div class="donut-text">
-            <div class="big">${total}</div>
-            <div class="small">Unidades evaluadas</div>
+          <div class="donut-text" id="fleet-donut-text">
+            <div class="big" id="fleet-donut-big">${total}</div>
+            <div class="small" id="fleet-donut-small">unidades evaluadas</div>
           </div>
         </div>
       `;
+    }
+
+    // Activa hover interactivo en el donut: actualiza el centro y resalta el segmento
+    function activateDonutInteractivity() {
+      const svg = document.getElementById("fleet-donut-svg");
+      const bigEl = document.getElementById("fleet-donut-big");
+      const smallEl = document.getElementById("fleet-donut-small");
+      if (!svg || !bigEl || !smallEl) return;
+
+      const originalBig = bigEl.textContent;
+      const originalSmall = smallEl.textContent;
+      const originalBigColor = bigEl.style.color || "";
+
+      const segments = svg.querySelectorAll(".donut-seg");
+      segments.forEach(function(seg) {
+        seg.addEventListener("mouseenter", function() {
+          const label = seg.dataset.label;
+          const count = seg.dataset.count;
+          const pct = seg.dataset.pct;
+          const color = seg.dataset.color;
+          bigEl.textContent = count;
+          bigEl.style.color = color;
+          smallEl.textContent = `${label} - ${pct}%`;
+          // Resaltar segmento (mas grueso)
+          seg.style.strokeWidth = "32";
+        });
+        seg.addEventListener("mouseleave", function() {
+          bigEl.textContent = originalBig;
+          bigEl.style.color = originalBigColor;
+          smallEl.textContent = originalSmall;
+          seg.style.strokeWidth = "";
+        });
+      });
     }
 
     function renderLeaderboardRow(r, rank) {
@@ -3284,8 +4262,8 @@
             </div>
             <div class="stat-row" style="margin-top: 12px;">
               <div class="stat">
-                <div class="stat-label">En Sweet Spot</div>
-                <div class="stat-value">${pct.toFixed(1)}%</div>
+                <div class="stat-label">Motor encendido</div>
+                <div class="stat-value">${formatHMS(r.totalEngineSec)}</div>
               </div>
               <div class="stat">
                 <div class="stat-label">Conduciendo</div>
@@ -3296,35 +4274,74 @@
                 <div class="stat-value">${formatHMS(r.idleSec)} <span class="inline-muted">(${pctIdleTotal.toFixed(0)}%)</span></div>
               </div>
               <div class="stat">
+                <div class="stat-label">Tiempo en Sweet Spot</div>
+                <div class="stat-value">${formatHMS(r.sweetSec)}</div>
+              </div>
+              <div class="stat">
                 <div class="stat-label">Periodo</div>
                 <div class="stat-value">${formatPeriod(fromDate, toDate)}</div>
               </div>
             </div>
           </div>
+
+          ${renderDailyChart(r.daily, fromUnix, toUnix)}
         </div>
 
+        ${(function() {
+          // Banner slim de ralenti justo despues del hero
+          let severity = "good";
+          let severityLabel = "Bajo";
+          if (pctIdleTotal >= 20) { severity = "bad"; severityLabel = "Alto"; }
+          else if (pctIdleTotal >= 10) { severity = "warn"; severityLabel = "Moderado"; }
+          return `
+            <div class="idle-banner-slim sev-${severity}">
+              <span class="ib-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </span>
+              <span class="ib-label">Tiempo en ralenti</span>
+              <span class="severity-pill sev-${severity}">${severityLabel}</span>
+              <span class="ib-pct">${pctIdleTotal.toFixed(1)}%</span>
+              <span class="ib-detail">${formatHMS(r.idleSec)} de ${formatHMS(r.totalEngineSec)} del motor encendido</span>
+            </div>
+          `;
+        })()}
+
         <div class="stack-legend">
+          <div class="item"><span class="dot" style="background:#94a3b8;"></span> Ralenti</div>
           <div class="item"><span class="dot" style="background:#f59e0b;"></span> Por debajo manejando (&lt; ${range.min})</div>
           <div class="item"><span class="dot" style="background:#10b981;"></span> Sweet Spot (${range.min}-${range.max})</div>
           <div class="item"><span class="dot" style="background:#ef4444;"></span> Por encima (&gt; ${range.max})</div>
         </div>
 
-        <p class="hint" style="margin: 0 0 4px 0; font-size: 12px;">Distribucion del tiempo conduciendo (el ralenti se excluye de esta evaluacion):</p>
+        <p class="hint" style="margin: 0 0 4px 0; font-size: 12px;">Distribucion del tiempo motor encendido (suma 100%). El ralenti no entra en la evaluacion del conductor.</p>
 
-        <div class="stack-bar">
-          ${pctBelow > 0 ? `<div class="seg below" style="width:${pctBelow}%">${pctBelow >= 8 ? pctBelow.toFixed(1) + '%' : ''}</div>` : ''}
-          ${pct > 0 ? `<div class="seg sweet" style="width:${pct}%">${pct >= 8 ? pct.toFixed(1) + '%' : ''}</div>` : ''}
-          ${pctAbove > 0 ? `<div class="seg above" style="width:${pctAbove}%">${pctAbove >= 8 ? pctAbove.toFixed(1) + '%' : ''}</div>` : ''}
-          ${drivingSec === 0 ? `<div class="seg" style="width:100%;background:#cbd5e1;color:#475569;">Sin tiempo de conduccion</div>` : ''}
-        </div>
+        ${(function() {
+          // Re-calcular % sobre tiempo motor encendido (no sobre tiempo conduciendo)
+          // para que la barra sume 100% incluyendo ralenti
+          const totalSec = r.totalEngineSec;
+          const pctIdleBar = totalSec > 0 ? (r.idleSec / totalSec) * 100 : 0;
+          const pctBelowBar = totalSec > 0 ? (r.belowSec / totalSec) * 100 : 0;
+          const pctSweetBar = totalSec > 0 ? (r.sweetSec / totalSec) * 100 : 0;
+          const pctAboveBar = totalSec > 0 ? (r.aboveSec / totalSec) * 100 : 0;
+          if (totalSec === 0) {
+            return `<div class="stack-bar"><div class="seg" style="width:100%;background:#cbd5e1;color:#475569;">Sin tiempo motor encendido</div></div>`;
+          }
+          return `
+            <div class="stack-bar">
+              ${pctIdleBar > 0 ? `<div class="seg idle" style="width:${pctIdleBar}%" title="Ralenti: ${formatHMS(r.idleSec)} (${pctIdleBar.toFixed(1)}%)">${pctIdleBar >= 8 ? pctIdleBar.toFixed(1) + '%' : ''}</div>` : ''}
+              ${pctBelowBar > 0 ? `<div class="seg below" style="width:${pctBelowBar}%" title="Por debajo: ${formatHMS(r.belowSec)} (${pctBelowBar.toFixed(1)}%)">${pctBelowBar >= 8 ? pctBelowBar.toFixed(1) + '%' : ''}</div>` : ''}
+              ${pctSweetBar > 0 ? `<div class="seg sweet" style="width:${pctSweetBar}%" title="Sweet Spot: ${formatHMS(r.sweetSec)} (${pctSweetBar.toFixed(1)}%)">${pctSweetBar >= 8 ? pctSweetBar.toFixed(1) + '%' : ''}</div>` : ''}
+              ${pctAboveBar > 0 ? `<div class="seg above" style="width:${pctAboveBar}%" title="Por encima: ${formatHMS(r.aboveSec)} (${pctAboveBar.toFixed(1)}%)">${pctAboveBar >= 8 ? pctAboveBar.toFixed(1) + '%' : ''}</div>` : ''}
+            </div>
+          `;
+        })()}
+
+        <h4 class="driving-breakdown-title">Desglose de conduccion · total ${formatHMS(drivingSec)}</h4>
 
         <div class="breakdown-grid">
-          <div class="breakdown-card idle">
-            <div class="bc-title">Ralenti</div>
-            <div class="bc-range">Motor ON, velocidad &lt; 3 km/h</div>
-            <div class="bc-time">${formatHMS(r.idleSec)}</div>
-            <div class="bc-pct">${pctIdleTotal.toFixed(1)}% del motor encendido</div>
-          </div>
           <div class="breakdown-card below">
             <div class="bc-title">Por debajo</div>
             <div class="bc-range">RPM &lt; ${range.min} manejando</div>
@@ -3479,6 +4496,98 @@
       `;
     }
 
+    // Genera un mini bar chart SVG con el score por dia (para el hero)
+    function renderDailyChart(daily, fromUnix, toUnix) {
+      const pad = (n) => String(n).padStart(2, "0");
+
+      // Construir array de dias entre las fechas
+      const days = [];
+      const start = new Date(fromUnix * 1000); start.setHours(0, 0, 0, 0);
+      const end = new Date(toUnix * 1000); end.setHours(0, 0, 0, 0);
+      const cursor = new Date(start);
+      while (cursor <= end) {
+        const key = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(cursor.getDate())}`;
+        const data = daily[key];
+        let score = null;
+        if (data && data.totalEngineSec > 0) {
+          const drivingSec = data.sweetSec + data.belowSec + data.aboveSec;
+          if (drivingSec > 0) {
+            // Score = % en Sweet Spot del tiempo conduciendo (igual que computeScore)
+            score = (data.sweetSec / drivingSec) * 100;
+          }
+        }
+        days.push({
+          key,
+          dayNum: pad(cursor.getDate()),
+          score,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      // Si solo hay 1 dia, no mostramos el chart (no aporta vs el score principal)
+      if (days.length < 2) return "";
+
+      // Dimensiones del SVG
+      const W = 340, H = 140;
+      const padLeft = 10, padRight = 10, padTop = 14, padBottom = 22;
+      const chartW = W - padLeft - padRight;
+      const chartH = H - padTop - padBottom;
+
+      const barCount = days.length;
+      const barGap = Math.min(6, chartW / (barCount * 4));
+      const barW = (chartW - barGap * (barCount - 1)) / barCount;
+
+      // Cuando hay muchos dias, etiquetar solo algunos numeros para evitar saturacion
+      const labelEvery = barCount <= 10 ? 1 : barCount <= 20 ? 2 : Math.ceil(barCount / 10);
+
+      // Lineas de referencia: 55 (aceptable), 70 (bueno)
+      const yFor = (score) => padTop + (chartH - (score / 100) * chartH);
+      const ref55 = yFor(55);
+      const ref70 = yFor(70);
+
+      const bars = days.map(function(d, i) {
+        const x = padLeft + i * (barW + barGap);
+        const numY = H - padBottom + 13;
+        const showLabel = i % labelEvery === 0 || i === barCount - 1;
+
+        if (d.score === null) {
+          return `
+            <rect class="chart-empty" x="${x}" y="${yFor(3)}" width="${barW}" height="${(3 / 100) * chartH}" rx="2"></rect>
+            ${showLabel ? `<text class="chart-label" x="${x + barW/2}" y="${numY}">${d.dayNum}</text>` : ''}
+          `;
+        }
+
+        let cls = "good";
+        if (d.score < 40) cls = "bad";
+        else if (d.score < 55) cls = "poor";
+        else if (d.score < 70) cls = "warn";
+
+        const barHeight = (d.score / 100) * chartH;
+        const barY = padTop + (chartH - barHeight);
+        const scoreY = barY - 3;
+
+        // Solo mostramos el numero del score si la barra es lo suficientemente ancha (>= 14px)
+        const showScore = barW >= 14;
+
+        return `
+          <rect class="chart-bar ${cls}" x="${x}" y="${barY}" width="${barW}" height="${barHeight}" rx="2"></rect>
+          ${showScore ? `<text class="chart-score ${cls}" x="${x + barW/2}" y="${scoreY}">${d.score.toFixed(0)}</text>` : ''}
+          ${showLabel ? `<text class="chart-label" x="${x + barW/2}" y="${numY}">${d.dayNum}</text>` : ''}
+        `;
+      }).join("");
+
+      return `
+        <div class="hero-chart">
+          <div class="hero-chart-title">Score por dia</div>
+          <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+            <line class="chart-ref" x1="${padLeft}" y1="${ref70}" x2="${W - padRight}" y2="${ref70}"></line>
+            <line class="chart-ref" x1="${padLeft}" y1="${ref55}" x2="${W - padRight}" y2="${ref55}"></line>
+            ${bars}
+          </svg>
+        </div>
+      `;
+    }
+
     function renderDailySection(daily, range, fromUnix, toUnix) {
       // Generar lista de dias entre fromUnix y toUnix (en hora local)
       const days = [];
@@ -3538,17 +4647,26 @@
 
         const pctDisplay = drivingSec === 0 ? "Solo ralenti" : `${pctReal.toFixed(1)}%`;
 
+        // Umbral minimo para mostrar texto dentro de un segmento
+        const MIN_PCT_FOR_TEXT = 6;
+
+        // Tooltips nativos del navegador con info detallada por segmento
+        const tipIdle  = `Ralenti: ${formatHMS(data.idleSec)} (${pctIdle.toFixed(1)}% del motor encendido)`;
+        const tipBelow = `Por debajo: ${formatHMS(data.belowSec)} (${pctBelowBar.toFixed(1)}% del motor encendido)`;
+        const tipSweet = `Sweet Spot: ${formatHMS(data.sweetSec)} (${pctSweetBar.toFixed(1)}% del motor encendido)`;
+        const tipAbove = `Por encima: ${formatHMS(data.aboveSec)} (${pctAboveBar.toFixed(1)}% del motor encendido)`;
+
         return `
           <div class="day-row">
             <div class="day-label">
               <span class="dow">${d.dow}</span>
               ${d.label}
             </div>
-            <div class="day-bar">
-              ${pctIdle > 0 ? `<div class="seg idle" style="width:${pctIdle}%"></div>` : ''}
-              ${pctBelowBar > 0 ? `<div class="seg below" style="width:${pctBelowBar}%"></div>` : ''}
-              ${pctSweetBar > 0 ? `<div class="seg sweet" style="width:${pctSweetBar}%"></div>` : ''}
-              ${pctAboveBar > 0 ? `<div class="seg above" style="width:${pctAboveBar}%"></div>` : ''}
+            <div class="day-bar" title="Motor encendido: ${formatHMS(data.totalEngineSec)} | Conduciendo: ${formatHMS(drivingSec)}">
+              ${pctIdle > 0 ? `<div class="seg idle" style="width:${pctIdle}%" title="${escapeHtml(tipIdle)}">${pctIdle >= MIN_PCT_FOR_TEXT ? pctIdle.toFixed(0) + '%' : ''}</div>` : ''}
+              ${pctBelowBar > 0 ? `<div class="seg below" style="width:${pctBelowBar}%" title="${escapeHtml(tipBelow)}">${pctBelowBar >= MIN_PCT_FOR_TEXT ? pctBelowBar.toFixed(0) + '%' : ''}</div>` : ''}
+              ${pctSweetBar > 0 ? `<div class="seg sweet" style="width:${pctSweetBar}%" title="${escapeHtml(tipSweet)}">${pctSweetBar >= MIN_PCT_FOR_TEXT ? pctSweetBar.toFixed(0) + '%' : ''}</div>` : ''}
+              ${pctAboveBar > 0 ? `<div class="seg above" style="width:${pctAboveBar}%" title="${escapeHtml(tipAbove)}">${pctAboveBar >= MIN_PCT_FOR_TEXT ? pctAboveBar.toFixed(0) + '%' : ''}</div>` : ''}
             </div>
             <div class="day-pct ${pctClass}">${pctDisplay}</div>
             <div class="day-time">${formatHMS(data.totalEngineSec)}</div>
@@ -3632,6 +4750,19 @@
 
     els.btnExecute.addEventListener("click", executeAnalysis);
     els.btnExecuteFleet.addEventListener("click", executeFleetAnalysis);
+
+    // UX: cerrar el picker de fecha al elegir un valor (en vez de quedar abierto)
+    function attachAutoCloseOnChange(input) {
+      if (!input) return;
+      input.addEventListener("change", function() {
+        // Pequeno delay para que el navegador procese el cambio antes de cerrar
+        setTimeout(function() { input.blur(); }, 50);
+      });
+    }
+    attachAutoCloseOnChange(els.dateFrom);
+    attachAutoCloseOnChange(els.dateTo);
+    attachAutoCloseOnChange(els.fleetDateFrom);
+    attachAutoCloseOnChange(els.fleetDateTo);
 
     const btnPrintAnalysis = document.getElementById("btn-print-analysis");
     if (btnPrintAnalysis) {
