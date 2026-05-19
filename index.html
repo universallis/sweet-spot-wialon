@@ -3042,42 +3042,40 @@
         showMainScreen(user);
       }
 
-      // Estrategia: probar metodos en cascada hasta que uno funcione.
-      // ORDEN OPTIMIZADO: duplicate(sid) es lo que funciona para Wialon Apps,
-      // los demas quedan como fallback por compatibilidad con otras configuraciones.
+      // Estrategia: probar TODOS los metodos con CUALQUIER hash disponible (sid o authHash).
+      // sid y authHash son ambos hashes de 32 caracteres, intercambiables segun la configuracion
+      // de la Wialon App. Probamos en cascada hasta que uno funcione.
       const attempts = [];
 
-      // 1. duplicate(sid) - METODO PRINCIPAL para Wialon Apps con "Active SID"
-      if (URL_SID && typeof session.duplicate === "function") {
-        attempts.push({
-          name: "duplicate(sid)",
-          run: function(cb) { session.duplicate(URL_SID, "", true, cb); }
-        });
+      // Construir lista de hashes a probar (dedup) - sid primero si existe, luego authHash
+      const hashesToTry = [];
+      if (URL_SID) hashesToTry.push({ value: URL_SID, label: "sid" });
+      if (URL_AUTH_HASH && URL_AUTH_HASH !== URL_SID) {
+        hashesToTry.push({ value: URL_AUTH_HASH, label: "authHash" });
       }
 
-      // 2. loginToken con authHash - si Wialon paso un token de auth (de "Authorize hash")
-      if (URL_AUTH_HASH) {
+      // Para cada hash, probar los 3 metodos de auth de Wialon
+      hashesToTry.forEach(function(h) {
+        // 1. duplicate - el que ha funcionado historicamente para Wialon Apps
+        if (typeof session.duplicate === "function") {
+          attempts.push({
+            name: `duplicate(${h.label})`,
+            run: function(cb) { session.duplicate(h.value, "", true, cb); }
+          });
+        }
+        // 2. loginAuthHash - para SDKs que lo soporten
+        if (typeof session.loginAuthHash === "function") {
+          attempts.push({
+            name: `loginAuthHash(${h.label})`,
+            run: function(cb) { session.loginAuthHash(h.value, cb); }
+          });
+        }
+        // 3. loginToken - ultimo recurso
         attempts.push({
-          name: "loginToken(authHash)",
-          run: function(cb) { session.loginToken(URL_AUTH_HASH, "", cb); }
+          name: `loginToken(${h.label})`,
+          run: function(cb) { session.loginToken(h.value, "", cb); }
         });
-      }
-
-      // 3. loginAuthHash - para SDKs/configuraciones que lo soporten
-      if (URL_SID && typeof session.loginAuthHash === "function") {
-        attempts.push({
-          name: "loginAuthHash(sid)",
-          run: function(cb) { session.loginAuthHash(URL_SID, cb); }
-        });
-      }
-
-      // 4. loginToken(sid) como ultimo recurso
-      if (URL_SID) {
-        attempts.push({
-          name: "loginToken(sid)",
-          run: function(cb) { session.loginToken(URL_SID, "", cb); }
-        });
-      }
+      });
 
       console.log("[AutoConnect] Estrategias a probar:", attempts.map(function(a) { return a.name; }));
 
