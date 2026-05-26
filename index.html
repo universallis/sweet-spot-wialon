@@ -2075,6 +2075,24 @@
     .topbar-right {
       display: flex;
       align-items: center;
+      gap: 10px;
+    }
+
+    /* Logo corporativo Ares-Sun: cambia segun dia/noche */
+    .brand-corp {
+      display: inline-flex;
+      align-items: center;
+    }
+    .brand-corp img {
+      display: block;
+      height: 36px;
+      width: auto;
+    }
+    .brand-corp .corp-night { display: none; }
+    [data-theme="dark"] .brand-corp .corp-day   { display: none; }
+    [data-theme="dark"] .brand-corp .corp-night { display: block; }
+    @media (max-width: 640px) {
+      .brand-corp img { height: 26px; }
     }
 
     /* === Mini grafica diaria en el hero === */
@@ -2394,6 +2412,10 @@
       </span>
     </h1>
     <div class="topbar-right">
+      <span class="brand-corp" aria-label="Ares-Sun - Powered by Wialon">
+        <img class="corp-day"   src="ares-sun-dia.png"   alt="Ares-Sun Powered by Wialon" />
+        <img class="corp-night" src="ares-sun-noche.png" alt="Ares-Sun Powered by Wialon" />
+      </span>
       <button class="theme-toggle" id="btn-theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
